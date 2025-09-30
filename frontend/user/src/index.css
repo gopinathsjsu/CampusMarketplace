@@ -1,0 +1,16 @@
+/* Global font family for the entire project */
+* {
+  font-family: Arial, sans-serif;
+}
+
+/* Additional fallback for body element */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure all input elements also use Arial */
+input, textarea, button, select {
+  font-family: inherit;
+}

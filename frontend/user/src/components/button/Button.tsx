@@ -3,16 +3,34 @@ interface ButtonProps {
   color?: string;
   rounded?: boolean;
   onClick?: () => void;
+  size?: 'base' | 'lg' | string;
+  bold?: boolean;
 }
 
 export default function Button({
     text,
     color = '#1F55A2',
     onClick,
-    rounded
+    rounded,
+    size = 'base',
+    bold = true
 }: ButtonProps) {
-  const baseClasses = 'm-2 px-4 py-2 text-white';
-  const roundedClasses = rounded ? 'rounded-full' : 'rounded-md';
+
+  const sizeClasses = (() => {
+    switch (size) {
+      case 'lg':
+        return 'px-10 py-3 text-lg';
+      case 'base':
+      default:
+        return 'px-4 py-2 text-sm';
+    }
+  })();
+
+  const weightClass = bold ? 'font-bold' : 'font-normal';
+  const baseClasses = `${sizeClasses} ${weightClass} text-white`;
+  const roundedClasses = rounded
+    ? 'rounded-full'
+    : (size === 'lg' ? 'rounded-2xl' : 'rounded-xl');
   const className = `${baseClasses} ${roundedClasses}`.trim();
 
   return (

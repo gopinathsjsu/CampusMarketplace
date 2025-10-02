@@ -10,9 +10,9 @@ interface ButtonProps {
 
 export default function Button({ text, color = '#1F55A2', onClick, className, rounded }: ButtonProps) {
   const buttonClasses = `btn ${rounded ? 'btn-rounded' : ''} ${className || ''}`.trim();
-  
+
   return (
-    <button 
+    <button
       className={buttonClasses}
       style={{ backgroundColor: color }}
       onClick={onClick}

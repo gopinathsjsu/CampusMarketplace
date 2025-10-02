@@ -18,9 +18,10 @@ export default function Button({
 
   const sizeClasses = (() => {
     switch (size) {
+      case 'base':
+        return 'px-4 py-2 text-sm';
       case 'lg':
         return 'px-10 py-3 text-lg';
-      case 'base':
       default:
         return 'px-4 py-2 text-sm';
     }

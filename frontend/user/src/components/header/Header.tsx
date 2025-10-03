@@ -1,12 +1,16 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Button from "../button";
 
 export default function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignInClick = () => {
     navigate('/sign-in');
   };
+
+  // Hide sign in button on sign in and sign up pages
+  const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up';
 
   return (
     <header className="flex justify-between items-center px-6 py-0 bg-white">
@@ -18,7 +22,9 @@ export default function Header() {
         />
       </div>
       <div className="flex items-center space-x-4">
-        <Button text="Sign In" rounded={true} onClick={handleSignInClick} />
+        {!isAuthPage && (
+          <Button text="Sign In" rounded={true} onClick={handleSignInClick} />
+        )}
       </div>
     </header>
   );

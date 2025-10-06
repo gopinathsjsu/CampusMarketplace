@@ -3,16 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import Button from "../../components/button";
 import Input from "../../components/input";
 import Modal from "../../components/modal";
+import { useUser } from "../../context/user.tsx";
+import type { User } from "../../context/user.tsx";
 
 export default function SignIn() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
+  const { setUser } = useUser();
+
   const handleSignIn = () => {
     if (username && password) {
       console.log('Sign in with:', { username, password });
       // TODO: Add API call to backend for authentication
+      const user: User = {
+        userName: username,
+        displayName: 'Seth McCarthy',
+        profilePicture: 'https://i.imgur.com/tddLRGt.jpeg',
+        schoolName: 'San Jose State University',
+        sellerRating: 5,
+        buyerRating: 4,
+      };
+      setUser(user);
+      navigate('/');
     } else {
       alert('Please enter both username and password');
     }

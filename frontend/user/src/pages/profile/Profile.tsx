@@ -1,11 +1,16 @@
 import Listing from '../../components/listing';
 import type { ListingData } from '../../types';
 import editIcon from '../../../assets/icons/edit.svg';
+import { useUser } from '../../context/user';
 
 const purchasesListings: ListingData[] = [
 ];
 
 export default function Profile() {
+  const { user } = useUser();
+
+  const avatarSrc = user?.profilePicture || '/favicon.ico';
+  const displayName = user?.displayName || user?.userName || 'User';
   return (
     <div className="px-8 py-6">
       <div className="grid lg:grid-cols-2">
@@ -13,13 +18,13 @@ export default function Profile() {
         <div className="flex flex-col items-center justify-start mt-8 lg:sticky lg:top-1/2 lg:-translate-y-1/2 self-start">
           <div className="w-[320px] h-[320px] rounded-full overflow-hidden">
             <img
-              src=""
-              alt="Profile"
+              src={avatarSrc}
+              alt={displayName}
               className="w-full h-full object-cover"
             />
           </div>
           <div className="mt-6 flex items-center space-x-3">
-            <h1 className="text-4xl font-extrabold text-gray-900">Don Percival</h1>
+            <h1 className="text-4xl font-extrabold text-gray-900">{displayName}</h1>
             <button
               type="button"
               aria-label="Edit profile"

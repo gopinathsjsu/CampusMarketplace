@@ -28,7 +28,7 @@ export default function Input({
       case 'base':
         return 'px-6 py-2 text-base rounded-full';
       case 'lg':
-        return 'px-6 py-4 text-lg rounded-2xl';
+        return 'px-6 py-2 text-lg rounded-2xl';
       default:
         return 'px-3 py-2 text-base rounded-xl';
     }

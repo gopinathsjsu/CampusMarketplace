@@ -4,6 +4,7 @@ import Header from "./components/header/Header.tsx"
 import SignIn from "./pages/signIn/SignIn.tsx";
 import SignUp from "./pages/signUp/SignUp.tsx";
 import Profile from "./pages/profile";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
 
@@ -13,7 +14,7 @@ function App() {
         <Header />
         <Routes>
           <Route path="/" element={""} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
         </Routes>

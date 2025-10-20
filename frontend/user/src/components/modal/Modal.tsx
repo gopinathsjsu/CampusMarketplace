@@ -19,10 +19,8 @@ export default function Modal({
 }: ModalProps) {
   if (!isOpen) return null;
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+  const handleOverlayClick = () => {
+    onClose();
   };
 
   const modalStyle = {
@@ -33,10 +31,9 @@ export default function Modal({
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center"
-      onClick={handleOverlayClick}
     >
       {mask && (
-        <div className="absolute inset-0 bg-black/25" />
+        <div className="absolute inset-0 bg-black/25" onClick={handleOverlayClick} />
       )}
       
       <div 

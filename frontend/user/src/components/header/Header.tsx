@@ -7,6 +7,10 @@ export default function Header() {
   const location = useLocation();
   const { user } = useUser();
 
+  const handleHomepageClick = () => {
+    navigate('/');
+  };
+
   const handleSignInClick = () => {
     navigate('/sign-in');
   };
@@ -25,7 +29,7 @@ export default function Header() {
           src="/assets/full-logo.svg"
           alt="Campus Marketplace"
           className="h-10 w-auto cursor-pointer"
-          onClick={() => navigate('/')}
+          onClick={handleHomepageClick}
         />
       </div>
       <div className="flex items-center space-x-4">

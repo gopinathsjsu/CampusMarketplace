@@ -7,6 +7,9 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 
+// Load environment variables FIRST
+dotenv.config({ path: path.join(__dirname, '../config.env') });
+
 import { connectDB } from '@/config/database';
 import { errorHandler } from '@/middleware/errorHandler';
 import authRoutes from '@/routes/auth';
@@ -14,9 +17,7 @@ import userRoutes from '@/routes/users';
 import productRoutes from '@/routes/products';
 import chatRoutes from '@/routes/chat';
 import adminRoutes from '@/routes/admin';
-
-// Load environment variables
-dotenv.config();
+import recordsRoutes from '@/routes/records';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -34,11 +35,30 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true
 }));
+// Lightweight request logger for debugging (toggle with DEBUG_REQUESTS=1)
+app.use((req, _res, next) => {
+  if (process.env.DEBUG_REQUESTS === '1') {
+    console.log(`[req] ${req.method} ${req.originalUrl}`);
+  }
+  next();
+});
 app.use(compression());
 app.use(morgan('combined'));
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Additional verbose logging including request body (post-parsing)
+morgan.token('body', (req) => {
+  try { return JSON.stringify((req as any).body); } catch { return '[unserializable]'; }
+});
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms ip=:remote-addr ua=":user-agent" body=:body'));
+
+// Log all /api traffic explicitly
+app.use('/api', (req, _res, next) => {
+  console.log(`[api] ${req.method} ${req.originalUrl} ip=${req.ip} cl=${req.headers['content-length'] || 0}`);
+  next();
+});
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -52,18 +72,44 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Debug endpoint to list registered routes
+app.get('/api/_debug/routes', (_req, res) => {
+  const routes: any[] = [];
+  const stack = (app as any)._router?.stack || [];
+  stack.forEach((layer: any) => {
+    if (layer.route && layer.route.path) {
+      const methods = Object.keys(layer.route.methods).map(m => m.toUpperCase());
+      routes.push({ base: '', path: layer.route.path, methods });
+    } else if (layer.name === 'router' && layer.handle?.stack) {
+      const baseMatch = layer.regexp && layer.regexp.toString();
+      const base = baseMatch || '';
+      layer.handle.stack.forEach((sub: any) => {
+        if (sub.route && sub.route.path) {
+          const methods = Object.keys(sub.route.methods).map((m: string) => m.toUpperCase());
+          routes.push({ base, path: sub.route.path, methods });
+        }
+      });
+    }
+  });
+  res.json({ success: true, routes });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/records', recordsRoutes);
+
+console.log('Routes mounted: /api/health, /api/auth, /api/users, /api/products, /api/chat, /api/admin, /api/records');
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use((req, res) => {
+  console.warn(`404 ${req.method} ${req.originalUrl} ip=${req.ip}`);
   res.status(404).json({
     success: false,
     message: 'API endpoint not found'

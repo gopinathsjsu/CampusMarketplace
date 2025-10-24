@@ -3,32 +3,35 @@ import { useNavigate } from 'react-router-dom';
 import Button from "../../components/button";
 import Input from "../../components/input";
 import Modal from "../../components/modal";
-import { useUser } from "../../context/user.tsx";
-import type { User } from "../../context/user.tsx";
+import { useUser } from "../../context/userDTO.tsx";
+import { authService, ApiError } from "../../services/auth.ts";
 
 export default function SignIn() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const { setUser } = useUser();
 
-  const handleSignIn = () => {
-    if (username && password) {
-      console.log('Sign in with:', { username, password });
-      // TODO: Add API call to backend for authentication
-      const user: User = {
-        userName: username,
-        displayName: 'Seth McCarthy',
-        profilePicture: 'https://i.imgur.com/tddLRGt.jpeg',
-        schoolName: 'San Jose State University',
-        sellerRating: 5,
-        buyerRating: 4,
-      };
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      alert('Please enter both username and password');
+      return;
+    }
+
+    try {
+      // Treat the username field as the email for login
+      const res = await authService.signIn({ email, password });
+      const { user, token } = res.data;
+
+      // Persist token for subsequent authenticated requests
+      try { localStorage.setItem('authToken', token); } catch {}
+
       setUser(user);
       navigate('/');
-    } else {
-      alert('Please enter both username and password');
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Failed to sign in';
+      alert(message);
     }
   };
 
@@ -50,12 +53,12 @@ export default function SignIn() {
 
           <div className="space-y-4">
             <Input
-              placeholder="Username"
+              placeholder="Email"
               width="350px"
               border={false}
               size={"lg"}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <Input
               placeholder="Password"

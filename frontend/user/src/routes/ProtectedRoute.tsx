@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useUser } from '../context/user';
+import { useUser } from '../context/userDTO.tsx';
 
 type ProtectedRouteProps = {
   children: ReactNode;

@@ -54,5 +54,5 @@ npm run preview    # Preview production build
 1. Navigate to the `ui-client` directory
 2. Install dependencies: `npm install`
 3. Start development server: `npm run dev`
-4. Open browser to `http://localhost:5173` (default Vite port)
+4. Open browser to `http://localhost:3050` (default Vite port)
  

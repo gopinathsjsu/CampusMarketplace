@@ -24,11 +24,11 @@ RUN chown -R frontend:nodejs /app
 USER frontend
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3050
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/api/health || exit 1
+  CMD curl -f http://localhost:3050/api/health || exit 1
 
 # Start the application
 CMD ["npm", "run", "dev"]

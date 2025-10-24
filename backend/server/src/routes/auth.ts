@@ -1,7 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import User from '@/models/User';
+import User, { IUser } from '@/models/User';
 import { authenticate, AuthRequest } from '@/middleware/auth';
 import { asyncHandler, createError } from '@/middleware/errorHandler';
 import { validateRequest } from '@/middleware/validation';
@@ -19,35 +19,42 @@ const generateToken = (userId: string): string => {
   } as SignOptions);
 };
 
-// @route   POST /api/auth/register
+// Map internal IUser document to public User DTO shape expected by frontend
+const toUserDTO = (user: IUser) => ({
+  _id: user._id,
+  email: user.email,
+  userName: user.userName || '',
+  profilePicture: user.profilePicture || '',
+  schoolName: user.schoolName || '',
+  sellerRating: user.sellerRating || 0,
+  buyerRating: user.buyerRating || 0
+});
+
+// @route   POST /api/auth/sign-up
 // @desc    Register a new user
 // @access  Public
-router.post('/register', [
+router.post('/sign-up', [
   body('email')
     .isEmail()
     .withMessage('Please provide a valid email')
     .normalizeEmail(),
+  body('userName')
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Display name must be between 1 and 100 characters'),
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters'),
-  body('firstName')
-    .trim()
-    .isLength({ min: 1, max: 50 })
-    .withMessage('First name is required and must be less than 50 characters'),
-  body('lastName')
-    .trim()
-    .isLength({ min: 1, max: 50 })
-    .withMessage('Last name is required and must be less than 50 characters'),
-  body('university')
+  body('schoolName')
     .trim()
     .isLength({ min: 1 })
-    .withMessage('University is required'),
-  body('role')
+    .withMessage('School name is required'),
+  /*body('profilePicture')
     .optional()
-    .isIn(['buyer', 'seller'])
-    .withMessage('Role must be either buyer or seller')
+    .isURL()
+    .withMessage('Profile picture must be a valid URL')*/
 ], validateRequest, asyncHandler(async (req: express.Request, res: express.Response) => {
-  const { email, password, firstName, lastName, university, role = 'buyer' } = req.body;
+  const { email, userName, password, profilePicture, schoolName } = req.body;
 
   // Check if user already exists
   const existingUser = await User.findOne({ email });
@@ -58,11 +65,10 @@ router.post('/register', [
   // Create user
   const user = await User.create({
     email,
+    userName,
     password,
-    firstName,
-    lastName,
-    university,
-    role
+    profilePicture: profilePicture || '',
+    schoolName
   });
 
   // Generate token
@@ -72,24 +78,16 @@ router.post('/register', [
     success: true,
     message: 'User registered successfully',
     data: {
-      user: {
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        university: user.university,
-        isVerified: user.isVerified
-      },
+      user: toUserDTO(user),
       token
     }
   });
 }));
 
-// @route   POST /api/auth/login
+// @route   POST /api/auth/sign-in
 // @desc    Login user
 // @access  Public
-router.post('/login', [
+router.post('/sign-in', [
   body('email')
     .isEmail()
     .withMessage('Please provide a valid email')
@@ -119,16 +117,7 @@ router.post('/login', [
     success: true,
     message: 'Login successful',
     data: {
-      user: {
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        university: user.university,
-        isVerified: user.isVerified,
-        avatar: user.avatar
-      },
+      user: toUserDTO(user),
       token
     }
   });
@@ -143,20 +132,7 @@ router.get('/me', authenticate, asyncHandler(async (req: AuthRequest, res: expre
   res.json({
     success: true,
     data: {
-      user: {
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        university: user.university,
-        isVerified: user.isVerified,
-        avatar: user.avatar,
-        phone: user.phone,
-        bio: user.bio,
-        graduationYear: user.graduationYear,
-        major: user.major
-      }
+      user: toUserDTO(user)
     }
   });
 }));
@@ -165,86 +141,39 @@ router.get('/me', authenticate, asyncHandler(async (req: AuthRequest, res: expre
 // @desc    Update user profile
 // @access  Private
 router.put('/profile', authenticate, [
-  body('firstName')
+  body('userName')
     .optional()
     .trim()
-    .isLength({ min: 1, max: 50 })
-    .withMessage('First name must be less than 50 characters'),
-  body('lastName')
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Display name must be between 1 and 100 characters'),
+  /*body('profilePicture')
     .optional()
-    .trim()
-    .isLength({ min: 1, max: 50 })
-    .withMessage('Last name must be less than 50 characters'),
-  body('phone')
-    .optional()
-    .matches(/^\+?[\d\s-()]+$/)
-    .withMessage('Please provide a valid phone number'),
-  body('bio')
-    .optional()
-    .isLength({ max: 500 })
-    .withMessage('Bio cannot exceed 500 characters'),
-  body('graduationYear')
-    .optional()
-    .isInt({ min: 2020, max: 2030 })
-    .withMessage('Graduation year must be between 2020 and 2030'),
-  body('major')
-    .optional()
-    .trim()
-    .isLength({ max: 100 })
-    .withMessage('Major cannot exceed 100 characters')
+    .isURL()
+    .withMessage('Profile picture must be a valid URL'),*/
 ], validateRequest, asyncHandler(async (req: AuthRequest, res: express.Response) => {
   const user = req.user!;
-  const allowedUpdates = ['firstName', 'lastName', 'phone', 'bio', 'graduationYear', 'major'];
-  
-  // Update only allowed fields
-  allowedUpdates.forEach(field => {
-    if (req.body[field] !== undefined) {
-      (user as any)[field] = req.body[field];
-    }
-  });
+
+  // Apply DTO fields directly
+  if (req.body.userName !== undefined) {
+    (user as any).userName = req.body.userName;
+  }
+  if (req.body.profilePicture !== undefined) {
+    (user as any).profilePicture = req.body.profilePicture;
+  }
 
   await user.save();
 
   res.json({
     success: true,
     message: 'Profile updated successfully',
-    data: { user }
+    data: { user: toUserDTO(user) }
   });
 }));
 
 // @route   POST /api/auth/change-password
 // @desc    Change user password
 // @access  Private
-router.post('/change-password', authenticate, [
-  body('currentPassword')
-    .isLength({ min: 1 })
-    .withMessage('Current password is required'),
-  body('newPassword')
-    .isLength({ min: 6 })
-    .withMessage('New password must be at least 6 characters')
-], validateRequest, asyncHandler(async (req: AuthRequest, res: express.Response) => {
-  const { currentPassword, newPassword } = req.body;
-  
-  // Get user with password
-  const user = await User.findById(req.user!._id).select('+password');
-  if (!user) {
-    throw createError('User not found', 404);
-  }
+// Password change is not applicable to the simplified user schema
 
-  // Verify current password
-  const isCurrentPasswordValid = await user.comparePassword(currentPassword);
-  if (!isCurrentPasswordValid) {
-    throw createError('Current password is incorrect', 400);
-  }
-
-  // Update password
-  user.password = newPassword;
-  await user.save();
-
-  res.json({
-    success: true,
-    message: 'Password changed successfully'
-  });
-}));
 
 export default router;

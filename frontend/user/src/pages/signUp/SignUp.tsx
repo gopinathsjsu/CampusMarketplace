@@ -1,26 +1,40 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from "../../components/button";
 import Input from "../../components/input";
 import Modal from "../../components/modal";
+import { authService, ApiError } from "../../services/auth.ts";
 
 export default function SignUp() {
-  const [username, setUsername] = useState('');
-  const [name, setName] = useState('');
-  const [school, setSchool] = useState('');
+  const [userName, setUserName] = useState('');
+  const [schoolName, setSchoolName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleSignUp = () => {
-    if (username && name && school && email && password && confirmPassword) {
-      if (password === confirmPassword) {
-        console.log('Sign up with:', { username, name, school, email, password });
-        // TODO: Add API call to backend for user registration
-      } else {
-        alert('Passwords do not match');
-      }
-    } else {
+  const handleSignUp = async () => {
+    if (!email || !userName || !schoolName || !password || !confirmPassword) {
       alert('Please fill in all fields');
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      await authService.signUp({
+        email,
+        userName,
+        password,
+        schoolName,
+      });
+
+      navigate('/sign-in');
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Failed to register';
+      alert(message);
     }
   };
 
@@ -42,24 +56,16 @@ export default function SignUp() {
               width="350px"
               border={false}
               size={"lg"}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <Input
-              placeholder="Name"
-              width="350px"
-              border={false}
-              size={"lg"}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
             />
             <Input
               placeholder="School"
               width="350px"
               border={false}
               size={"lg"}
-              value={school}
-              onChange={(e) => setSchool(e.target.value)}
+              value={schoolName}
+              onChange={(e) => setSchoolName(e.target.value)}
             />
             <Input
               placeholder="Email"

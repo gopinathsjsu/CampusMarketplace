@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import Button from "../button";
-import { useUser } from "../../context/user.tsx";
+import { useUser } from "../../context/userDTO.tsx";
 
 export default function Header() {
   const navigate = useNavigate();

@@ -1,34 +1,37 @@
 import Listing from '../../components/listing';
 import type { ListingData } from '../../types';
 import editIcon from '../../../assets/icons/edit.svg';
-import { useUser } from '../../context/user';
+import { useUser } from '../../context/userDTO.tsx';
 import { useEffect, useState } from 'react';
 import Modal from '../../components/modal';
 import Input from '../../components/input';
 import Button from '../../components/button';
+import { authService } from "../../services/auth.ts";
 
 const purchasesListings: ListingData[] = [];
 
-export default function Profile() {
+function Profile() {
   const { user } = useUser();
   const { setUser } = useUser();
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [nameInput, setNameInput] = useState(user?.displayName || user?.userName || '');
-  const [passwordInput, setPasswordInput] = useState('');
+  const [userName, setUserName] = useState(user?.userName || '');
 
   useEffect(() => {
-    setNameInput(user?.displayName || user?.userName || '');
+    setUserName(user?.displayName || user?.userName || '');
   }, [user]);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!user) {
       setIsEditOpen(false);
       return;
     }
-    const next = { ...user, displayName: nameInput?.trim() || user.displayName };
-    // TODO: call API to update user info
-    setUser(next);
-    setPasswordInput('');
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    if (token) {
+      const res = await authService.updateProfile(token, { userName });
+      const { user: updatedUser } = res.data;
+      setUser(updatedUser);
+    }
     setIsEditOpen(false);
   };
 
@@ -81,18 +84,8 @@ export default function Profile() {
               <label className="block text-gray-900 font-semibold">Username</label>
             </div>
             <Input
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              width="100%"
-              size="base"
-            />
-            <div className={"flex justify-start px-2"}>
-              <label className="block text-gray-900 font-semibold">Password</label>
-            </div>
-            <Input
-              type="password"
-              value={passwordInput}
-              onChange={(e) => setPasswordInput(e.target.value)}
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
               width="100%"
               size="base"
             />
@@ -110,5 +103,7 @@ export default function Profile() {
     </div>
   );
 }
+
+export default Profile
 
 

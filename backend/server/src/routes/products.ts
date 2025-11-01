@@ -241,11 +241,6 @@ router.put('/:id', authenticate, upload.array('images', 5), [
     throw createError('Product not found', 404);
   }
 
-  // Check ownership or admin
-  if (product.seller.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
-    throw createError('Not authorized to update this product', 403);
-  }
-
   // Handle new images if uploaded
   const files = req.files as Express.Multer.File[];
   if (files && files.length > 0) {
@@ -278,11 +273,6 @@ router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: e
 
   if (!product) {
     throw createError('Product not found', 404);
-  }
-
-  // Check ownership or admin
-  if (product.seller.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
-    throw createError('Not authorized to delete this product', 403);
   }
 
   // Delete associated image files

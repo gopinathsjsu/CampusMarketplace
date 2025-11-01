@@ -199,31 +199,6 @@ router.get('/users/:id/activity', authenticate, authorize('admin'), asyncHandler
   });
 }));
 
-// @route   PUT /api/admin/users/:id/verify
-// @desc    Verify/unverify a user
-// @access  Private (Admin)
-router.put('/users/:id/verify', authenticate, authorize('admin'), asyncHandler(async (req: AuthRequest, res: express.Response) => {
-  const { isVerified } = req.body;
-  
-  const user = await User.findById(req.params.id);
-  if (!user) {
-    res.status(404).json({
-      success: false,
-      message: 'User not found'
-    });
-    return;
-  }
-
-  user.isVerified = Boolean(isVerified);
-  await user.save();
-
-  res.json({
-    success: true,
-    message: `User ${isVerified ? 'verified' : 'unverified'} successfully`,
-    data: { user }
-  });
-}));
-
 // @route   GET /api/admin/analytics
 // @desc    Get platform analytics
 // @access  Private (Admin)

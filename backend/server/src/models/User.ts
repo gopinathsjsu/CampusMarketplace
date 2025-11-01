@@ -4,30 +4,38 @@ import bcrypt from 'bcryptjs';
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
+  userName: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  role: 'buyer' | 'seller' | 'admin';
-  isVerified: boolean;
-  avatar?: string;
+  profilePicture: string;
+  schoolName: string;
+  sellerRating: number;
+  buyerRating: number;
+  // Compatibility fields used across routes (optional)
+  firstName?: string;
+  lastName?: string;
+  university?: string;
   phone?: string;
-  bio?: string;
-  university: string;
-  graduationYear?: number;
-  major?: string;
+  role?: 'buyer' | 'seller' | 'admin';
+  isVerified?: boolean;
+  avatar?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
-  getFullName(): string;
 }
 
 const userSchema = new Schema<IUser>({
   email: {
     type: String,
-    required: [true, 'Email is required'],
+    required: [true, 'Username is required'],
     unique: true,
-    lowercase: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+    trim: true,
+    lowercase: true
+  },
+  userName: {
+    type: String,
+    required: [true, 'Display name is required'],
+    trim: true,
+    maxlength: [100, 'Display name cannot exceed 100 characters']
   },
   password: {
     type: String,
@@ -35,17 +43,26 @@ const userSchema = new Schema<IUser>({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false
   },
+  profilePicture: {
+    type: String,
+    default: ''
+  },
+  // Optional fields for broader compatibility with existing routes
   firstName: {
     type: String,
-    required: [true, 'First name is required'],
-    trim: true,
-    maxlength: [50, 'First name cannot exceed 50 characters']
+    default: ''
   },
   lastName: {
     type: String,
-    required: [true, 'Last name is required'],
-    trim: true,
-    maxlength: [50, 'Last name cannot exceed 50 characters']
+    default: ''
+  },
+  university: {
+    type: String,
+    default: ''
+  },
+  phone: {
+    type: String,
+    default: ''
   },
   role: {
     type: String,
@@ -58,46 +75,34 @@ const userSchema = new Schema<IUser>({
   },
   avatar: {
     type: String,
-    default: null
+    default: ''
   },
-  phone: {
+  schoolName: {
     type: String,
-    match: [/^\+?[\d\s-()]+$/, 'Please enter a valid phone number']
-  },
-  bio: {
-    type: String,
-    maxlength: [500, 'Bio cannot exceed 500 characters']
-  },
-  university: {
-    type: String,
-    required: [true, 'University is required'],
+    required: [true, 'School name is required'],
     trim: true
   },
-  graduationYear: {
+  sellerRating: {
     type: Number,
-    min: [2020, 'Graduation year must be 2020 or later'],
-    max: [2030, 'Graduation year must be 2030 or earlier']
+    default: 0
   },
-  major: {
-    type: String,
-    trim: true,
-    maxlength: [100, 'Major cannot exceed 100 characters']
+  buyerRating: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: { virtuals: false },
+  toObject: { virtuals: false }
 });
 
-// Index for faster queries
+// Indices
 userSchema.index({ email: 1 });
-userSchema.index({ university: 1 });
-userSchema.index({ role: 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -111,16 +116,6 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
-
-// Get full name method
-userSchema.methods.getFullName = function(): string {
-  return `${this.firstName} ${this.lastName}`;
-};
-
-// Virtual for full name
-userSchema.virtual('fullName').get(function() {
-  return this.getFullName();
-});
 
 // Remove password from JSON output
 userSchema.methods.toJSON = function() {

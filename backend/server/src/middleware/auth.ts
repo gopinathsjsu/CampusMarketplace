@@ -39,7 +39,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
   }
 };
 
-export const authorize = (...roles: string[]) => {
+export const authorize = (..._roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
@@ -48,15 +48,7 @@ export const authorize = (...roles: string[]) => {
       });
       return;
     }
-
-    if (!roles.includes(req.user.role)) {
-      res.status(403).json({
-        success: false,
-        message: 'Access denied. Insufficient permissions.'
-      });
-      return;
-    }
-
+    // Role-based authorization removed in simplified user model
     next();
   };
 };

@@ -11,10 +11,10 @@ import { validateRequest } from '@/middleware/validation';
 
 const router = express.Router();
 
-// Configure multer for avatar uploads
+// Configure multer for profilePicture uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads/avatars');
+    const uploadDir = path.join(__dirname, '../../uploads/profilePictures');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `avatar-${uniqueSuffix}${path.extname(file.originalname)}`);
+    cb(null, `profilePicture-${uniqueSuffix}${path.extname(file.originalname)}`);
   }
 });
 
@@ -157,7 +157,7 @@ router.get('/:id/products', [
 
   const [products, total] = await Promise.all([
     Product.find(filter)
-      .populate('seller', 'firstName lastName avatar university')
+      .populate('seller', 'firstName lastName profilePicture university')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum),
@@ -178,86 +178,34 @@ router.get('/:id/products', [
   });
 }));
 
-// @route   POST /api/users/avatar
-// @desc    Upload user avatar
+// @route   POST /api/users/profilePicture
+// @desc    Upload user profilePicture
 // @access  Private
-router.post('/avatar', authenticate, upload.single('avatar'), asyncHandler(async (req: AuthRequest, res: express.Response) => {
+router.post('/profilePicture', authenticate, upload.single('profilePicture'), asyncHandler(async (req: AuthRequest, res: express.Response) => {
   const file = req.file;
 
   if (!file) {
     throw createError('Please upload an image file', 400);
   }
 
-  // Delete old avatar if exists
-  if (req.user!.avatar) {
-    const oldAvatarPath = path.join(__dirname, '../../', req.user!.avatar);
+  // Delete old profilePicture if exists
+  if (req.user!.profilePicture) {
+    const oldAvatarPath = path.join(__dirname, '../../', req.user!.profilePicture);
     if (fs.existsSync(oldAvatarPath)) {
       fs.unlinkSync(oldAvatarPath);
     }
   }
 
-  // Update user avatar
-  req.user!.avatar = `/uploads/avatars/${file.filename}`;
+  // Update user profilePicture
+  req.user!.profilePicture = `/uploads/profilePictures/${file.filename}`;
   await req.user!.save();
 
   res.json({
     success: true,
     message: 'Avatar uploaded successfully',
     data: {
-      avatar: req.user!.avatar
+      profilePicture: req.user!.profilePicture
     }
-  });
-}));
-
-// @route   DELETE /api/users/avatar
-// @desc    Delete user avatar
-// @access  Private
-router.delete('/avatar', authenticate, asyncHandler(async (req: AuthRequest, res: express.Response) => {
-  if (!req.user!.avatar) {
-    throw createError('No avatar to delete', 400);
-  }
-
-  // Delete avatar file
-  const avatarPath = path.join(__dirname, '../../', req.user!.avatar);
-  if (fs.existsSync(avatarPath)) {
-    fs.unlinkSync(avatarPath);
-  }
-
-  // Update user
-  req.user!.avatar = undefined;
-  await req.user!.save();
-
-  res.json({
-    success: true,
-    message: 'Avatar deleted successfully'
-  });
-}));
-
-// @route   PUT /api/users/:id/role
-// @desc    Update user role (admin only)
-// @access  Private (Admin)
-router.put('/:id/role', authenticate, authorize('admin'), [
-  query('role').isIn(['buyer', 'seller', 'admin']).withMessage('Invalid role')
-], validateRequest, asyncHandler(async (req: AuthRequest, res: express.Response) => {
-  const { role } = req.body;
-
-  const user = await User.findById(req.params.id);
-  if (!user) {
-    throw createError('User not found', 404);
-  }
-
-  // Prevent admin from changing their own role
-  if (user._id.toString() === req.user!._id.toString()) {
-    throw createError('Cannot change your own role', 400);
-  }
-
-  user.role = role;
-  await user.save();
-
-  res.json({
-    success: true,
-    message: 'User role updated successfully',
-    data: { user }
   });
 }));
 
@@ -275,11 +223,11 @@ router.delete('/:id', authenticate, authorize('admin'), asyncHandler(async (req:
     throw createError('Cannot delete your own account', 400);
   }
 
-  // Delete user's avatar if exists
-  if (user.avatar) {
-    const avatarPath = path.join(__dirname, '../../', user.avatar);
-    if (fs.existsSync(avatarPath)) {
-      fs.unlinkSync(avatarPath);
+  // Delete user's profilePicture if exists
+  if (user.profilePicture) {
+    const profilePicturePath = path.join(__dirname, '../../', user.profilePicture);
+    if (fs.existsSync(profilePicturePath)) {
+      fs.unlinkSync(profilePicturePath);
     }
   }
 

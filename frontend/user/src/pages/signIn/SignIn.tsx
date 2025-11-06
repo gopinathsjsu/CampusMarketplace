@@ -1,21 +1,35 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Button from "../../components/button";
 import Input from "../../components/input";
 import Modal from "../../components/modal";
 import { useUser } from "../../context/userDTO.tsx";
 import { authService, ApiError } from "../../services/auth.ts";
+import Notification from "../../components/notification";
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { setUser } = useUser();
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({ show: false, message: '', type: 'success' });
+
+  useEffect(() => {
+    const state = location.state as { message?: string } | null;
+    if (state?.message) {
+      setNotification({ show: true, message: state.message, type: 'success' });
+    }
+  }, [location.state]);
 
   const handleSignIn = async () => {
     if (!email || !password) {
-      alert('Please enter both username and password');
+      setNotification({ show: true, message: 'Please enter both email and password', type: 'error' });
       return;
     }
 
@@ -31,7 +45,7 @@ export default function SignIn() {
       navigate('/');
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Failed to sign in';
-      alert(message);
+      setNotification({ show: true, message, type: 'error' });
     }
   };
 
@@ -90,6 +104,12 @@ export default function SignIn() {
           </div>
         </div>
       </Modal>
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        isVisible={notification.show}
+        onClose={() => setNotification(prev => ({ ...prev, show: false }))}
+      />
     </div>
   );
 }

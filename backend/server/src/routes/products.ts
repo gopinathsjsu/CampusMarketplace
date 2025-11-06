@@ -94,7 +94,7 @@ router.get('/', [
 
   const [products, total] = await Promise.all([
     Product.find(filter)
-      .populate('seller', 'firstName lastName avatar university')
+      .populate('seller', 'userName profilePicture email schoolName')
       .sort(sort)
       .skip(skip)
       .limit(limitNum)
@@ -121,7 +121,7 @@ router.get('/', [
 // @access  Public
 router.get('/:id', optionalAuth, asyncHandler(async (req: AuthRequest, res: express.Response) => {
   const product = await Product.findById(req.params.id)
-    .populate('seller', 'firstName lastName avatar university phone email');
+    .populate('seller', 'userName profilePicture email schoolName');
 
   if (!product) {
     throw createError('Product not found', 404);
@@ -140,8 +140,8 @@ router.get('/:id', optionalAuth, asyncHandler(async (req: AuthRequest, res: expr
 
 // @route   POST /api/products
 // @desc    Create a new product listing
-// @access  Private (Seller only)
-router.post('/', authenticate, authorize('seller', 'admin'), upload.array('images', 5), [
+// @access  Private
+router.post('/', authenticate, upload.array('images', 5), [
   body('title')
     .trim()
     .isLength({ min: 1, max: 100 })
@@ -190,7 +190,7 @@ router.post('/', authenticate, authorize('seller', 'admin'), upload.array('image
     seller: req.user!._id
   });
 
-  await product.populate('seller', 'firstName lastName avatar university');
+  await product.populate('seller', 'userName profilePicture email schoolName');
 
   res.status(201).json({
     success: true,
@@ -256,7 +256,7 @@ router.put('/:id', authenticate, upload.array('images', 5), [
   });
 
   await product.save();
-  await product.populate('seller', 'firstName lastName avatar university');
+  await product.populate('seller', 'userName profilePicture email schoolName');
 
   res.json({
     success: true,

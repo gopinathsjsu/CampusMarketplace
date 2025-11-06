@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Load environment variables FIRST
-dotenv.config({ path: path.join(__dirname, '../config.env') });
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 import { connectDB } from '@/config/database';
 import { errorHandler } from '@/middleware/errorHandler';

@@ -4,6 +4,7 @@ import Button from "../../components/button";
 import Input from "../../components/input";
 import Modal from "../../components/modal";
 import { authService, ApiError } from "../../services/auth.ts";
+import Notification from "../../components/notification";
 
 export default function SignUp() {
   const [userName, setUserName] = useState('');
@@ -12,14 +13,19 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({ show: false, message: '', type: 'success' });
 
   const handleSignUp = async () => {
     if (!email || !userName || !schoolName || !password || !confirmPassword) {
-      alert('Please fill in all fields');
+      setNotification({ show: true, message: 'Please fill in all fields', type: 'error' });
       return;
     }
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setNotification({ show: true, message: 'Passwords do not match', type: 'error' });
       return;
     }
 
@@ -31,10 +37,10 @@ export default function SignUp() {
         schoolName,
       });
 
-      navigate('/sign-in');
+      navigate('/sign-in', { state: { message: 'Registration successful. Please sign in.' } });
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Failed to register';
-      alert(message);
+      setNotification({ show: true, message, type: 'error' });
     }
   };
 
@@ -109,6 +115,12 @@ export default function SignUp() {
           </div>
         </div>
       </Modal>
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        isVisible={notification.show}
+        onClose={() => setNotification(prev => ({ ...prev, show: false }))}
+      />
     </div>
   );
 }

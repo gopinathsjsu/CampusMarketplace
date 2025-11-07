@@ -51,7 +51,7 @@ export interface BasicSuccessResponse {
   message: string;
 }
 
-const API_AUTH_URL = `${import.meta.env.VITE_API_BASE_URL}/auth`;
+const API_AUTH_URL = `${import.meta.env.VITE_APP_API_BASE_URL}/auth`;
 
 class ApiError extends Error {
   public status: number;

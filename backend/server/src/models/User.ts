@@ -99,19 +99,6 @@ const userSchema = new Schema<IUser>({
 // Indices
 userSchema.index({ email: 1 });
 
-// Virtual fields for backward compatibility with Chat routes
-userSchema.virtual('firstName').get(function() {
-  // Split userName into first name (everything before last space)
-  const parts = this.userName?.split(' ') || [];
-  return parts.length > 1 ? parts.slice(0, -1).join(' ') : this.userName || '';
-});
-
-userSchema.virtual('lastName').get(function() {
-  // Get last word of userName as last name
-  const parts = this.userName?.split(' ') || [];
-  return parts.length > 1 ? parts[parts.length - 1] : '';
-});
-
 userSchema.virtual('avatar').get(function() {
   return this.profilePicture || '';
 });

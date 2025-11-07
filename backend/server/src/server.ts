@@ -6,12 +6,14 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
+import { createServer } from 'http';
 
 // Load environment variables FIRST
 dotenv.config({ path: path.join(__dirname, '../config.env') });
 
 import { connectDB } from '@/config/database';
 import { errorHandler } from '@/middleware/errorHandler';
+import { initializeSocket } from '@/config/socket';
 import authRoutes from '@/routes/auth';
 import userRoutes from '@/routes/users';
 import productRoutes from '@/routes/products';
@@ -20,6 +22,7 @@ import adminRoutes from '@/routes/admin';
 import recordsRoutes from '@/routes/records';
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 5000;
 
 // Rate limiting
@@ -133,9 +136,15 @@ app.use((req, res) => {
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
+    
+    // Initialize Socket.io
+    initializeSocket(httpServer);
+    console.log('✅ Socket.io initialized');
+    
+    httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📚 Campus Marketplace API ready at http://localhost:${PORT}/api`);
+      console.log(`🔌 WebSocket ready for real-time chat`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

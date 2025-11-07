@@ -5,6 +5,7 @@ import Product from '@/models/Product';
 import { authenticate, AuthRequest } from '@/middleware/auth';
 import { asyncHandler, createError } from '@/middleware/errorHandler';
 import { validateRequest } from '@/middleware/validation';
+import { emitNewMessage, emitMessageRead, emitNewChat } from '@/config/socket';
 
 const router = express.Router();
 
@@ -113,6 +114,9 @@ router.post('/', authenticate, [
   // Find or create chat
   const chat = await Chat.findOrCreateChat(buyerId, sellerId, productId);
 
+  // Emit new chat event to seller
+  emitNewChat(sellerId.toString(), chat);
+
   res.json({
     success: true,
     data: { chat }
@@ -152,6 +156,10 @@ router.post('/:id/messages', authenticate, [
   await chat.populate('participants', 'userName profilePicture email');
   await chat.populate('product', 'title price images status');
   await chat.populate('messages.sender', 'userName profilePicture email');
+
+  // Emit new message event to chat participants
+  const lastMessage = chat.messages[chat.messages.length - 1];
+  emitNewMessage(chatId, lastMessage);
 
   res.json({
     success: true,
@@ -228,6 +236,9 @@ router.put('/:id/read', authenticate, asyncHandler(async (req: AuthRequest, res:
   }
 
   await chat.markMessagesAsRead(req.user!._id);
+
+  // Emit message read event to chat participants
+  emitMessageRead(req.params.id, req.user!._id.toString());
 
   res.json({
     success: true,

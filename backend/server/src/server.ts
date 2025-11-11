@@ -8,7 +8,21 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Load environment variables FIRST
-dotenv.config({ path: path.join(__dirname, '../.env') });
+// Check for --mode argument or default to 'dev'
+const modeArgIndex = process.argv.findIndex(arg => arg === '--mode');
+const mode = modeArgIndex !== -1 ? process.argv[modeArgIndex + 1] : process.argv[2] || 'dev';
+const envFile = `.env.${mode}`;
+const envPath = path.join(__dirname, '..', envFile);
+
+console.log(`🔧 Loading environment from: ${envFile}`);
+const result = dotenv.config({ path: envPath });
+
+if (result.error) {
+  console.warn(`⚠️  Could not load ${envFile}, trying .env as fallback`);
+  dotenv.config({ path: path.join(__dirname, '../.env') });
+} else {
+  console.log(`✅ Environment loaded successfully from ${envFile}`);
+}
 
 import { connectDB } from '@/config/database';
 import { errorHandler } from '@/middleware/errorHandler';
@@ -18,6 +32,7 @@ import productRoutes from '@/routes/products';
 import chatRoutes from '@/routes/chat';
 import adminRoutes from '@/routes/admin';
 import recordsRoutes from '@/routes/records';
+import fileRoutes from '@/routes/file';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -114,8 +129,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/records', recordsRoutes);
+app.use('/api/file', fileRoutes);
 
-console.log('Routes mounted: /api/health, /api/auth, /api/users, /api/products, /api/chat, /api/admin, /api/records');
 
 // Error handling middleware (must be last)
 app.use(errorHandler);

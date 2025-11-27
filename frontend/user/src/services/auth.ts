@@ -51,7 +51,7 @@ export interface BasicSuccessResponse {
   message: string;
 }
 
-const API_AUTH_URL = `${import.meta.env.VITE_APP_API_BASE_URL}/auth`;
+const BASE_URL = `${import.meta.env.VITE_APP_API_BASE_URL}/auth`;
 
 class ApiError extends Error {
   public status: number;
@@ -94,21 +94,21 @@ function authHeader(token?: string): Record<string, string> {
 }
 
 const signUp = async (request: RegisterRequest): Promise<AuthSuccessResponse> => {
-  return requestJson<AuthSuccessResponse>(`${API_AUTH_URL}/sign-up`, {
+  return requestJson<AuthSuccessResponse>(`${BASE_URL}/sign-up`, {
     method: 'POST',
     body: JSON.stringify(request),
   });
 };
 
 const signIn = async (request: LoginRequest): Promise<AuthSuccessResponse> => {
-  return requestJson<AuthSuccessResponse>(`${API_AUTH_URL}/sign-in`, {
+  return requestJson<AuthSuccessResponse>(`${BASE_URL}/sign-in`, {
     method: 'POST',
     body: JSON.stringify(request),
   });
 };
 
 const getMe = async (accessToken: string): Promise<MeSuccessResponse> => {
-  return requestJson<MeSuccessResponse>(`${API_AUTH_URL}/me`, {
+  return requestJson<MeSuccessResponse>(`${BASE_URL}/me`, {
     headers: {
       ...authHeader(accessToken),
     },
@@ -119,7 +119,7 @@ const updateProfile = async (
   accessToken: string,
   updates: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
-  return requestJson<UpdateProfileResponse>(`${API_AUTH_URL}/profile`, {
+  return requestJson<UpdateProfileResponse>(`${BASE_URL}/profile`, {
     method: 'PUT',
     headers: {
       ...authHeader(accessToken),
@@ -132,7 +132,7 @@ const changePassword = async (
   accessToken: string,
   payload: ChangePasswordRequest
 ): Promise<BasicSuccessResponse> => {
-  return requestJson<BasicSuccessResponse>(`${API_AUTH_URL}/change-password`, {
+  return requestJson<BasicSuccessResponse>(`${BASE_URL}/change-password`, {
     method: 'POST',
     headers: {
       ...authHeader(accessToken),

@@ -34,7 +34,7 @@ export default function Input({
     }
   })();
 
-  const baseClasses = `m-2 ${sizeClasses} text-gray-700 bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed disabled:border-gray-200 placeholder:text-gray-400`;
+  const baseClasses = `${sizeClasses} text-gray-700 bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed disabled:border-gray-200 placeholder:text-gray-400`;
   const borderClasses = border ? 'border-2 border-gray-200 focus:border-blue-500' : '';
   const className = `${baseClasses} ${borderClasses}`.trim();
 

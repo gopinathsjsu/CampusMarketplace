@@ -35,7 +35,7 @@ import recordsRoutes from '@/routes/records';
 import fileRoutes from '@/routes/file';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5050;
 
 // Rate limiting
 const limiter = rateLimit({

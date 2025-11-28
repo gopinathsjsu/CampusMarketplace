@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Modal from '../../modal';
 import Button from '../../button';
 import Input from '../../input';
+import { uploadFile, FileUploadError } from '../../../services/file';
+import MapPicker from '../../map/MapPicker';
 
 interface CreateListingModalProps {
   isOpen: boolean;
@@ -10,9 +12,13 @@ interface CreateListingModalProps {
 
 export default function CreateListingModal({ isOpen, onClose }: CreateListingModalProps) {
   const [image, setImage] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [category, setCategory] = useState('Apparel');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const categories = [
     'Vehicles',
@@ -23,19 +29,35 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
     'Entertainment'
   ];
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+      const file = e.target.files[0];
+      setImage(file);
+      setError(null);
+      setUploading(true);
+
+      try {
+        const response = await uploadFile(file, 'listings');
+        setImageUrl(response.data.file.url);
+      } catch (err) {
+        const message = err instanceof FileUploadError ? err.message : 'Failed to upload image';
+        setError(message);
+        setImage(null);
+        setImageUrl(null);
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
   const handleSubmit = () => {
     // TODO: Implement actual submission logic
     console.log({
-      image,
+      imageUrl,
       category,
       price,
-      description
+      description,
+      location
     });
     onClose();
   };
@@ -49,21 +71,31 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
         <div className="mb-4">
           <label className="block text-lg font-semibold mb-2 text-left">Image</label>
           <div 
-            className="border-2 border-dashed border-gray-300 rounded-3xl h-40 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50"
-            onClick={() => document.getElementById('image-upload')?.click()}
+            className="border-2 border-dashed border-gray-300 rounded-3xl h-40 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 overflow-hidden relative"
+            onClick={() => !uploading && document.getElementById('image-upload')?.click()}
           >
-            {image ? (
-              <span className="text-gray-700">{image.name}</span>
+            {uploading ? (
+              <span className="text-gray-500">Uploading...</span>
+            ) : imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt="Uploaded preview" 
+                className="w-full h-full object-cover"
+              />
             ) : (
               <span className="text-6xl text-gray-400">+</span>
             )}
           </div>
+          {error && (
+            <p className="text-red-500 text-sm mt-1">{error}</p>
+          )}
           <input
             id="image-upload"
             type="file"
             accept="image/*"
             className="hidden"
             onChange={handleImageUpload}
+            disabled={uploading}
           />
         </div>
 
@@ -95,6 +127,7 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
               onChange={(e) => setPrice(e.target.value)}
               width="100%"
               size="base"
+              className="pl-10"
             />
           </div>
         </div>
@@ -115,10 +148,10 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
         <div className="mb-6">
           <label className="block text-lg font-semibold mb-2 text-left">Location</label>
           <div className="border-2 border-gray-200 rounded-3xl h-48 bg-gray-100 overflow-hidden">
-            {/* Placeholder for map - could integrate Google Maps or similar */}
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              Map placeholder
-            </div>
+            <MapPicker
+              onChange={(coords) => setLocation(coords)}
+              className="w-full h-full"
+            />
           </div>
         </div>
 

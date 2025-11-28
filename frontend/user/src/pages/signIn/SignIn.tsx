@@ -54,7 +54,7 @@ export default function SignIn() {
   };
 
   return (
-    <div>
+    <div className="px-8 py-6 bg-white h-screen">
       <Modal
         isOpen={true}
         width={"500px"}

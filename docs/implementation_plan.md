@@ -18,11 +18,13 @@
 
 ### Eugene: Backend & Infrastructure
 *Focus: APIs, AI search, admin, deployment.*
-- [ ] **Stabilize existing APIs**: Quick pass over `products`, `chat`, `auth`, `users` routes for obvious bugs and missing validations.
-- [ ] **Standardize responses**: Ensure error and success responses follow a consistent `{ success, message, data }` shape.
-- [ ] **AI Search Endpoint**: Add `routes/ai.ts` with `POST /api/ai/search` that accepts a `query` string and maps it to `search`, optional category, and price filters. Start with simple rule-based parsing; only integrate OpenAI if time permits.
-- [ ] **Admin APIs**: Add endpoints to list reported products and mark them as reviewed / taken down.
-- [ ] **Deployment**: Finalize Docker/Docker Compose for backend + MongoDB + frontend on a single EC2 instance and document copy-pasteable deploy steps in the `README`.
+- [x] **Stabilize existing APIs**: Quick pass over `products`, `chat`, `auth`, `users` routes for obvious bugs and missing validations.
+- [x] **Standardize responses**: Ensure error and success responses follow a consistent `{ success, message, data }` shape.
+- [x] **AI Search Endpoint**: Add `routes/ai.ts` with `POST /api/ai/search`.
+- [x] **Admin APIs**: Add endpoints to list reported products and mark them as reviewed / taken down.
+- [x] **Deployment**: Finalize Docker/Docker Compose for backend + MongoDB + frontend. Fixed Express 5 and Node 22 issues.
+- [x] **Security**: Secured product update/delete routes.
+- [x] **Frontend Config**: Fixed frontend port mapping and environment variables.
 
 ### Seth: Frontend Listings (Seller Experience)
 *Focus: Creating and managing listings.*
@@ -37,16 +39,15 @@
 - [ ] **Home / Browse Page**: Fetch from `GET /api/products` and render a grid of product cards.
 - [ ] **Search Bar**: Wire text search to the `?search=` query param.
 - [ ] **Filters**: Add UI controls for category, condition, and min/max price and pass them as query params to the products API.
-- [ ] **Pagination / Load More**: Implement basic pagination using `page` and `limit` from the API (either page buttons or a “Load More” button).
+- [ ] **Pagination / Load More**: Implement basic pagination using `page` and `limit` from the API.
 
 ### Ananya: Frontend Chat & Project Artifacts
 *Focus: Chat UI and course-required artifacts.*
-- [ ] **Chat UI**: Build conversations + message thread views wired to `GET /api/chat`, `GET /api/chat/:id/messages`, and `POST /api/chat/:id/messages`, using simple polling instead of websockets.
+- [ ] **Chat UI**: Build conversations + message thread views wired to `GET /api/chat`, `GET /api/chat/:id/messages`, and `POST /api/chat/:id/messages`.
 - [ ] **Start Chat Flow**: Wire the "Message Seller" button on Product Details to `POST /api/chat` to create/open a chat for a product.
-- [ ] **Admin View (Minimal)**: Simple page to show reported products using the admin APIs (read-only if time is tight).
-- [ ] **Docs & Diagrams**: Keep `docs/implementation_plan.md`, component/deployment diagrams, and links to the Project Journal / backlog / burndown up to date in the repo `README`.
+- [ ] **Admin View (Minimal)**: Simple page to show reported products using the admin APIs.
+- [ ] **Docs & Diagrams**: Keep `docs/implementation_plan.md` and diagrams updated.
 
 ## Immediate Next Steps
-1.  **Eugene**: Set up the OpenAI API key in `.env` and create the AI route.
-2.  **Frontend Team (Ananya, Seth, Faye)**: Agree on a shared `ProductCard` and `Layout` component to avoid merge conflicts.
-3.  **Deployment**: Do a "Dry Run" deployment locally with `docker-compose` to ensure the build works.
+1.  **Frontend Team**: Start building the pages listed above. The backend is fully ready on `http://localhost:5001`.
+2.  **Verification**: Use the `sign-in` flow (already working) to get a token, then start calling other APIs.

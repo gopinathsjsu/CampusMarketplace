@@ -44,7 +44,16 @@ export default function SignIn() {
       setUser(user);
       navigate('/');
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Failed to sign in';
+      let message = 'Failed to sign in';
+
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          message = 'Invalid email or password';
+        } else if (err.message) {
+          message = err.message;
+        }
+      }
+
       setNotification({ show: true, message, type: 'error' });
     }
   };

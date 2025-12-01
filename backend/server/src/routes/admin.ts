@@ -25,8 +25,8 @@ router.get('/dashboard', authenticate, authorize('admin'), asyncHandler(async (r
     Product.countDocuments(),
     Chat.countDocuments(),
     Product.countDocuments({ isReported: true }),
-    User.find().sort({ createdAt: -1 }).limit(5).select('firstName lastName email university createdAt'),
-    Product.find().sort({ createdAt: -1 }).limit(5).populate('seller', 'firstName lastName')
+    User.find().sort({ createdAt: -1 }).limit(5).select('userName schoolName email createdAt'),
+    Product.find().sort({ createdAt: -1 }).limit(5).populate('seller', 'userName firstName lastName')
   ]);
 
   // Get user statistics by role
@@ -80,8 +80,8 @@ router.get('/reported-products', authenticate, authorize('admin'), [
 
   const [products, total] = await Promise.all([
     Product.find({ isReported: true })
-      .populate('seller', 'firstName lastName email university')
-      .populate('reportedBy', 'firstName lastName email')
+      .populate('seller', 'userName profilePicture email schoolName firstName lastName university')
+      .populate('reportedBy', 'userName profilePicture email firstName lastName')
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limitNum),
@@ -223,7 +223,7 @@ router.get('/analytics', authenticate, authorize('admin'), asyncHandler(async (r
       { $limit: 5 }
     ]),
     User.aggregate([
-      { $group: { _id: '$university', count: { $sum: 1 } } },
+      { $group: { _id: '$schoolName', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 }
     ]),
@@ -233,7 +233,7 @@ router.get('/analytics', authenticate, authorize('admin'), asyncHandler(async (r
       { $limit: 10 },
       { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'seller' } },
       { $unwind: '$seller' },
-      { $project: { count: 1, 'seller.firstName': 1, 'seller.lastName': 1, 'seller.university': 1 } }
+      { $project: { count: 1, 'seller.userName': 1, 'seller.schoolName': 1, 'seller.firstName': 1, 'seller.lastName': 1 } }
     ])
   ]);
 

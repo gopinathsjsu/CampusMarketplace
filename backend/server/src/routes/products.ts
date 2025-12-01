@@ -1,29 +1,16 @@
 import express from 'express';
 import { body, query } from 'express-validator';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import Product from '@/models/Product';
 import { authenticate, authorize, optionalAuth, AuthRequest } from '@/middleware/auth';
 import { asyncHandler, createError } from '@/middleware/errorHandler';
 import { validateRequest } from '@/middleware/validation';
+import { uploadMultipleToS3, deleteMultipleFromS3, extractKeyFromUrl } from '@/services/file';
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads/products');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `product-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+// Configure multer for file uploads (memory storage for S3)
+const storage = multer.memoryStorage();
 
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   if (file.mimetype.startsWith('image/')) {
@@ -94,7 +81,7 @@ router.get('/', [
 
   const [products, total] = await Promise.all([
     Product.find(filter)
-      .populate('seller', 'firstName lastName avatar university')
+      .populate('seller', 'userName profilePicture firstName lastName avatar university schoolName')
       .sort(sort)
       .skip(skip)
       .limit(limitNum)
@@ -121,7 +108,7 @@ router.get('/', [
 // @access  Public
 router.get('/:id', optionalAuth, asyncHandler(async (req: AuthRequest, res: express.Response) => {
   const product = await Product.findById(req.params.id)
-    .populate('seller', 'firstName lastName avatar university phone email');
+    .populate('seller', 'userName profilePicture firstName lastName avatar university schoolName phone email');
 
   if (!product) {
     throw createError('Product not found', 404);
@@ -175,8 +162,9 @@ router.post('/', authenticate, authorize('seller', 'admin'), upload.array('image
     throw createError('At least one image is required', 400);
   }
 
-  // Process uploaded images
-  const images = files.map(file => `/uploads/products/${file.filename}`);
+  // Process uploaded images to S3
+  const uploadResults = await uploadMultipleToS3(files, { folder: 'products' });
+  const images = uploadResults.map(result => result.fileUrl);
 
   const product = await Product.create({
     title,
@@ -190,7 +178,7 @@ router.post('/', authenticate, authorize('seller', 'admin'), upload.array('image
     seller: req.user!._id
   });
 
-  await product.populate('seller', 'firstName lastName avatar university');
+  await product.populate('seller', 'userName profilePicture firstName lastName avatar university schoolName');
 
   res.status(201).json({
     success: true,
@@ -241,10 +229,15 @@ router.put('/:id', authenticate, upload.array('images', 5), [
     throw createError('Product not found', 404);
   }
 
+  if (product.seller.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
+    throw createError('Not authorized to update this product', 403);
+  }
+
   // Handle new images if uploaded
   const files = req.files as Express.Multer.File[];
   if (files && files.length > 0) {
-    const newImages = files.map(file => `/uploads/products/${file.filename}`);
+    const uploadResults = await uploadMultipleToS3(files, { folder: 'products' });
+    const newImages = uploadResults.map(result => result.fileUrl);
     req.body.images = [...(product.images || []), ...newImages];
   }
 
@@ -256,7 +249,7 @@ router.put('/:id', authenticate, upload.array('images', 5), [
   });
 
   await product.save();
-  await product.populate('seller', 'firstName lastName avatar university');
+  await product.populate('seller', 'userName profilePicture firstName lastName avatar university schoolName');
 
   res.json({
     success: true,
@@ -275,13 +268,18 @@ router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: e
     throw createError('Product not found', 404);
   }
 
-  // Delete associated image files
-  product.images.forEach(imagePath => {
-    const fullPath = path.join(__dirname, '../../', imagePath);
-    if (fs.existsSync(fullPath)) {
-      fs.unlinkSync(fullPath);
-    }
-  });
+  if (product.seller.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
+    throw createError('Not authorized to delete this product', 403);
+  }
+
+  // Delete associated image files from S3
+  if (product.images && product.images.length > 0) {
+    const keys = product.images
+      .map(url => extractKeyFromUrl(url))
+      .filter((key): key is string => key !== null);
+    
+    await deleteMultipleFromS3(keys);
+  }
 
   await Product.findByIdAndDelete(req.params.id);
 

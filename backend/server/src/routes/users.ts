@@ -157,7 +157,7 @@ router.get('/:id/products', [
 
   const [products, total] = await Promise.all([
     Product.find(filter)
-      .populate('seller', 'firstName lastName profilePicture university')
+      .populate('seller', 'userName profilePicture firstName lastName avatar university schoolName')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum),

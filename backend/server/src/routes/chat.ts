@@ -24,7 +24,7 @@ router.get('/', authenticate, [
     participants: req.user!._id,
     isActive: true
   })
-    .populate('participants', 'firstName lastName avatar')
+    .populate('participants', 'userName profilePicture firstName lastName avatar')
     .populate('product', 'title price images status')
     .sort({ lastActivity: -1 })
     .skip(skip)
@@ -54,9 +54,9 @@ router.get('/', authenticate, [
 // @access  Private
 router.get('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: express.Response) => {
   const chat = await Chat.findById(req.params.id)
-    .populate('participants', 'firstName lastName avatar')
+    .populate('participants', 'userName profilePicture firstName lastName avatar')
     .populate('product', 'title price images status seller')
-    .populate('messages.sender', 'firstName lastName avatar');
+    .populate('messages.sender', 'userName profilePicture firstName lastName avatar');
 
   if (!chat) {
     throw createError('Chat not found', 404);
@@ -149,9 +149,9 @@ router.post('/:id/messages', authenticate, [
   await chat.addMessage(req.user!._id, content);
   
   // Populate the updated chat
-  await chat.populate('participants', 'firstName lastName avatar');
+  await chat.populate('participants', 'userName profilePicture firstName lastName avatar');
   await chat.populate('product', 'title price images status');
-  await chat.populate('messages.sender', 'firstName lastName avatar');
+  await chat.populate('messages.sender', 'userName profilePicture firstName lastName avatar');
 
   res.json({
     success: true,
@@ -193,7 +193,7 @@ router.get('/:id/messages', authenticate, [
   const messages = chat.messages.slice(startIndex, endIndex);
 
   // Populate sender information
-  await chat.populate('messages.sender', 'firstName lastName avatar');
+  await chat.populate('messages.sender', 'userName profilePicture firstName lastName avatar');
 
   res.json({
     success: true,

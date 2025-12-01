@@ -135,7 +135,7 @@ chatSchema.statics.findOrCreateChat = async function(
   let chat = await this.findOne({
     participants: { $all: [buyerId, sellerId] },
     product: productId
-  }).populate('participants', 'firstName lastName avatar')
+  }).populate('participants', 'userName profilePicture firstName lastName avatar')
     .populate('product', 'title price images');
 
   if (!chat) {
@@ -145,7 +145,7 @@ chatSchema.statics.findOrCreateChat = async function(
       messages: []
     });
     
-    await chat.populate('participants', 'firstName lastName avatar');
+    await chat.populate('participants', 'userName profilePicture firstName lastName avatar');
     await chat.populate('product', 'title price images');
   }
 

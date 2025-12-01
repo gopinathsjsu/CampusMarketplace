@@ -10,14 +10,15 @@ export interface IUser extends Document {
   schoolName: string;
   sellerRating: number;
   buyerRating: number;
-  // Compatibility fields used across routes (optional)
+  // Virtuals
   firstName?: string;
   lastName?: string;
   university?: string;
+  avatar?: string;
+  // Optional fields
   phone?: string;
   role?: 'buyer' | 'seller' | 'admin';
   isVerified?: boolean;
-  avatar?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -47,23 +48,6 @@ const userSchema = new Schema<IUser>({
     type: String,
     default: ''
   },
-  // Optional fields for broader compatibility with existing routes
-  firstName: {
-    type: String,
-    default: ''
-  },
-  lastName: {
-    type: String,
-    default: ''
-  },
-  university: {
-    type: String,
-    default: ''
-  },
-  phone: {
-    type: String,
-    default: ''
-  },
   role: {
     type: String,
     enum: ['buyer', 'seller', 'admin'],
@@ -72,10 +56,6 @@ const userSchema = new Schema<IUser>({
   isVerified: {
     type: Boolean,
     default: false
-  },
-  avatar: {
-    type: String,
-    default: ''
   },
   schoolName: {
     type: String,
@@ -92,8 +72,8 @@ const userSchema = new Schema<IUser>({
   }
 }, {
   timestamps: true,
-  toJSON: { virtuals: false },
-  toObject: { virtuals: false }
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Indices
@@ -117,6 +97,27 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+// Virtuals for backward compatibility
+userSchema.virtual('firstName').get(function() {
+  if (!this.userName) return '';
+  const parts = this.userName.split(' ');
+  return parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0];
+});
+
+userSchema.virtual('lastName').get(function() {
+  if (!this.userName) return '';
+  const parts = this.userName.split(' ');
+  return parts.length > 1 ? parts[parts.length - 1] : '';
+});
+
+userSchema.virtual('avatar').get(function() {
+  return this.profilePicture || '';
+});
+
+userSchema.virtual('university').get(function() {
+  return this.schoolName || '';
+});
+
 // Remove password from JSON output
 userSchema.methods.toJSON = function() {
   const userObject = this.toObject();
@@ -125,4 +126,3 @@ userSchema.methods.toJSON = function() {
 };
 
 export default mongoose.model<IUser>('User', userSchema);
-

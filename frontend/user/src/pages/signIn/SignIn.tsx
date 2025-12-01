@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Button from "../../components/button";
 import Input from "../../components/input";
@@ -58,6 +58,11 @@ export default function SignIn() {
     }
   };
 
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    handleSignIn();
+  };
+
   const handleSignUp = () => {
     navigate('/sign-up');
   };
@@ -71,7 +76,7 @@ export default function SignIn() {
         onClose={() => {
         }}
       >
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <h1 className="text-3xl font-bold text-center" style={{ color: "#1F55A2" }}>Sign In</h1>
 
           <div className="space-y-4">
@@ -99,7 +104,7 @@ export default function SignIn() {
               <Button
                 text="Sign In"
                 size={"lg"}
-                onClick={handleSignIn}
+                type="submit"
               />
             </div>
             <div className="w-full">
@@ -111,7 +116,7 @@ export default function SignIn() {
               />
             </div>
           </div>
-        </div>
+        </form>
       </Modal>
       <Notification
         message={notification.message}

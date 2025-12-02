@@ -23,5 +23,3 @@ export default function UserMenu({ onProfileClick, onSignOut }: UserMenuProps) {
     </div>
   );
 }
-
-

@@ -15,7 +15,7 @@ export default function Modal({
   mask = true,
   backgroundColor = '#F6F7FA',
   width,
-  children
+  children,
 }: ModalProps) {
   if (!isOpen) return null;
 
@@ -25,18 +25,14 @@ export default function Modal({
 
   const modalStyle = {
     backgroundColor,
-    ...(width && { width })
+    ...(width && { width }),
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center"
-    >
-      {mask && (
-        <div className="absolute inset-0 bg-black/25" onClick={handleOverlayClick} />
-      )}
-      
-      <div 
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {mask && <div className="absolute inset-0 bg-black/25" onClick={handleOverlayClick} />}
+
+      <div
         className="relative bg-white rounded-3xl px-6 py-12 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto"
         style={modalStyle}
         onClick={(e) => e.stopPropagation()}

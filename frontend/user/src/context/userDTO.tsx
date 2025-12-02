@@ -1,4 +1,12 @@
-import { createContext, useContext, useMemo, useState, type ReactNode, useEffect, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+  useEffect,
+  useCallback,
+} from 'react';
 
 export type UserDTO = {
   userName: string;
@@ -48,11 +56,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
 
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
 
 export function useUser(): UserContextValue {

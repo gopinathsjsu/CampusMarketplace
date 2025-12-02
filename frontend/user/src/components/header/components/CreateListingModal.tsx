@@ -26,7 +26,7 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
     'Apparel',
     'Classifieds',
     'Electronics',
-    'Entertainment'
+    'Entertainment',
   ];
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +57,7 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
       category,
       price,
       description,
-      location
+      location,
     });
     onClose();
   };
@@ -66,29 +66,23 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
     <Modal isOpen={isOpen} onClose={onClose} backgroundColor="#FFFFFF" width="600px">
       <div className="flex flex-col text-left">
         <h2 className="text-3xl font-bold mb-6">Create Listing</h2>
-        
+
         {/* Image Upload */}
         <div className="mb-4">
           <label className="block text-lg font-semibold mb-2 text-left">Image</label>
-          <div 
+          <div
             className="border-2 border-dashed border-gray-300 rounded-3xl h-40 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 overflow-hidden relative"
             onClick={() => !uploading && document.getElementById('image-upload')?.click()}
           >
             {uploading ? (
               <span className="text-gray-500">Uploading...</span>
             ) : imageUrl ? (
-              <img 
-                src={imageUrl} 
-                alt="Uploaded preview" 
-                className="w-full h-full object-cover"
-              />
+              <img src={imageUrl} alt="Uploaded preview" className="w-full h-full object-cover" />
             ) : (
               <span className="text-6xl text-gray-400">+</span>
             )}
           </div>
-          {error && (
-            <p className="text-red-500 text-sm mt-1">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           <input
             id="image-upload"
             type="file"
@@ -119,7 +113,9 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
         <div className="mb-4">
           <label className="block text-lg font-semibold mb-2 text-left">Price</label>
           <div className="relative">
-            <span className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-700 text-base">$</span>
+            <span className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-700 text-base">
+              $
+            </span>
             <Input
               type="number"
               placeholder=""
@@ -148,24 +144,15 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
         <div className="mb-6">
           <label className="block text-lg font-semibold mb-2 text-left">Location</label>
           <div className="border-2 border-gray-200 rounded-3xl h-48 bg-gray-100 overflow-hidden">
-            <MapPicker
-              onChange={(coords) => setLocation(coords)}
-              className="w-full h-full"
-            />
+            <MapPicker onChange={(coords) => setLocation(coords)} className="w-full h-full" />
           </div>
         </div>
 
         {/* Submit Button */}
         <div className="flex justify-center">
-          <Button
-            text="Submit"
-            size="lg"
-            rounded={true}
-            onClick={handleSubmit}
-          />
+          <Button text="Submit" size="lg" rounded={true} onClick={handleSubmit} />
         </div>
       </div>
     </Modal>
   );
 }
-

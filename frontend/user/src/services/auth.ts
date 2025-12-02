@@ -1,5 +1,5 @@
-import type { UserDTO } from "../context/userDTO.tsx";
-import { API } from "../routes/api.ts";
+import type { UserDTO } from '../context/userDTO.tsx';
+import { API } from '../routes/api.ts';
 
 export interface RegisterRequest {
   email: string;
@@ -58,7 +58,7 @@ class ApiError extends Error {
 
   constructor(status: number, message: string) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
     this.status = status;
   }
 }
@@ -117,7 +117,7 @@ const getMe = async (accessToken: string): Promise<MeSuccessResponse> => {
 
 const updateProfile = async (
   accessToken: string,
-  updates: UpdateProfileRequest
+  updates: UpdateProfileRequest,
 ): Promise<UpdateProfileResponse> => {
   return requestJson<UpdateProfileResponse>(API.auth.profile, {
     method: 'PUT',
@@ -130,7 +130,7 @@ const updateProfile = async (
 
 const changePassword = async (
   accessToken: string,
-  payload: ChangePasswordRequest
+  payload: ChangePasswordRequest,
 ): Promise<BasicSuccessResponse> => {
   return requestJson<BasicSuccessResponse>(API.auth.changePassword, {
     method: 'POST',

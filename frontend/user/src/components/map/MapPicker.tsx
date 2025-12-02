@@ -13,8 +13,7 @@ interface MapPickerProps {
 }
 
 const GOOGLE_MAPS_API_KEY =
-  (import.meta as any)?.env?.VITE_GOOGLE_MAPS_API_KEY ||
-  'AIzaSyDmyZ_sJw5q1fGztTGUbjcHQcrGPeccOa4';
+  (import.meta as any)?.env?.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyDmyZ_sJw5q1fGztTGUbjcHQcrGPeccOa4';
 const GOOGLE_MAPS_MAP_ID =
   (import.meta as any)?.env?.VITE_GOOGLE_MAPS_MAP_ID || 'a3be8a190a0ca2cc98e12b0f';
 
@@ -48,7 +47,7 @@ function loadGoogleMapsApi(apiKey: string): Promise<any> {
     const script = document.createElement('script');
     script.id = 'google-maps-script';
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
-      apiKey
+      apiKey,
     )}&v=beta&libraries=maps,marker`;
     script.async = true;
     script.defer = true;
@@ -72,7 +71,7 @@ export default function MapPicker({
   onChange,
   className,
   value = null,
-  zoom = DEFAULT_ZOOM
+  zoom = DEFAULT_ZOOM,
 }: MapPickerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any | null>(null);
@@ -98,7 +97,7 @@ export default function MapPicker({
           mapId: GOOGLE_MAPS_MAP_ID,
           disableDefaultUI: true,
           clickableIcons: false,
-          gestureHandling: 'greedy'
+          gestureHandling: 'greedy',
         };
 
         const map = new Map(containerRef.current, mapOptions);
@@ -159,7 +158,7 @@ export default function MapPicker({
       markerRef.current = new AdvancedMarkerElement({
         map,
         position: coords,
-        gmpDraggable: true
+        gmpDraggable: true,
       });
       dragEndListenerRef.current = markerRef.current.addListener('dragend', () => {
         const next = toCoords(markerRef.current.position);
@@ -171,10 +170,5 @@ export default function MapPicker({
     }
   }
 
-  return (
-    <div ref={containerRef} className={className} style={{ width: '100%', height: '100%' }} />
-  );
+  return <div ref={containerRef} className={className} style={{ width: '100%', height: '100%' }} />;
 }
-
-
-

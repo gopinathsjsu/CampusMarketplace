@@ -29,4 +29,3 @@ export const API = {
     status: `${BASE_URL}/status`,
   },
 } as const;
-

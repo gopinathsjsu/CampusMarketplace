@@ -36,7 +36,6 @@ ui-client/
 ├── tsconfig.node.json             # TypeScript config for Node.js
 └── vite.config.ts                 # Vite build configuration
 ```
-  
 
 ## Getting Started
 
@@ -55,4 +54,3 @@ npm run preview    # Preview production build
 2. Install dependencies: `npm install`
 3. Start development server: `npm run dev`
 4. Open browser to `http://localhost:3050` (default Vite port)
- 

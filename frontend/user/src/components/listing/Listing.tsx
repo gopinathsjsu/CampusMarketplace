@@ -5,7 +5,6 @@ export interface ListingProps {
   data: ListingData;
 }
 
-
 async function getUser(userId: string): Promise<UserData | null> {
   // TODO: Implement actual API call when backend is ready
   return null;
@@ -42,9 +41,7 @@ export default function Listing({ data }: ListingProps) {
 
       <div className="bg-gray-100 px-4 py-4 rounded-b-2xl -translate-y-2">
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-gray-900">
-            ${data.price.toFixed(2)}
-          </div>
+          <div className="text-2xl font-bold text-gray-900">${data.price.toFixed(2)}</div>
 
           <div className="flex items-center space-x-3">
             {loading ? (
@@ -64,9 +61,7 @@ export default function Listing({ data }: ListingProps) {
                   userData?.displayName || 'Unknown User'
                 )}
               </div>
-              <div className="text-sm text-gray-600">
-                {data.location}
-              </div>
+              <div className="text-sm text-gray-600">{data.location}</div>
             </div>
           </div>
         </div>

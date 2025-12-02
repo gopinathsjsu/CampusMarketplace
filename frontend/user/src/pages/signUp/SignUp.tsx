@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from "../../components/button";
-import Input from "../../components/input";
-import Modal from "../../components/modal";
-import { authService, ApiError } from "../../services/auth.ts";
-import Notification from "../../components/notification";
+import Button from '../../components/button';
+import Input from '../../components/input';
+import Modal from '../../components/modal';
+import { authService, ApiError } from '../../services/auth.ts';
+import Notification from '../../components/notification';
 
 export default function SignUp() {
   const [userName, setUserName] = useState('');
@@ -46,22 +46,18 @@ export default function SignUp() {
 
   return (
     <div className="px-8 py-6 bg-white h-screen">
-      <Modal
-        isOpen={true}
-        width={"500px"}
-        mask={false}
-        onClose={() => {
-        }}
-      >
+      <Modal isOpen={true} width={'500px'} mask={false} onClose={() => {}}>
         <div className="space-y-6">
-          <h1 className="text-3xl font-bold text-center" style={{ color: "#1F55A2" }}>Sign Up</h1>
+          <h1 className="text-3xl font-bold text-center" style={{ color: '#1F55A2' }}>
+            Sign Up
+          </h1>
 
           <div className="space-y-4">
             <Input
               placeholder="Username"
               width="350px"
               border={false}
-              size={"lg"}
+              size={'lg'}
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
             />
@@ -69,7 +65,7 @@ export default function SignUp() {
               placeholder="School"
               width="350px"
               border={false}
-              size={"lg"}
+              size={'lg'}
               value={schoolName}
               onChange={(e) => setSchoolName(e.target.value)}
             />
@@ -78,7 +74,7 @@ export default function SignUp() {
               type="email"
               width="350px"
               border={false}
-              size={"lg"}
+              size={'lg'}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -87,7 +83,7 @@ export default function SignUp() {
               type="password"
               width="350px"
               border={false}
-              size={"lg"}
+              size={'lg'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -96,21 +92,15 @@ export default function SignUp() {
               type="password"
               width="350px"
               border={false}
-              size={"lg"}
+              size={'lg'}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
 
           <div className="space-y-3">
-
             <div className="w-full">
-              <Button
-                text="Sign Up"
-                size={"lg"}
-                color="#E5A924"
-                onClick={handleSignUp}
-              />
+              <Button text="Sign Up" size={'lg'} color="#E5A924" onClick={handleSignUp} />
             </div>
           </div>
         </div>
@@ -119,7 +109,7 @@ export default function SignUp() {
         message={notification.message}
         type={notification.type}
         isVisible={notification.show}
-        onClose={() => setNotification(prev => ({ ...prev, show: false }))}
+        onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
       />
     </div>
   );

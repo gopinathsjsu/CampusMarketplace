@@ -23,7 +23,7 @@ export default function Input({
   required = false,
   disabled = false,
   onChange,
-  className: customClassName
+  className: customClassName,
 }: InputProps) {
   const sizeClasses = (() => {
     switch (size) {

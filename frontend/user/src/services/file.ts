@@ -16,7 +16,7 @@ export class FileUploadError extends Error {
 
   constructor(status: number, message: string) {
     super(message);
-    this.name = "FileUploadError";
+    this.name = 'FileUploadError';
     this.status = status;
   }
 }
@@ -28,7 +28,7 @@ function authHeader(): Record<string, string> {
 
 export const uploadFile = async (
   file: File,
-  folder: string = 'listings'
+  folder: string = 'listings',
 ): Promise<FileUploadResponse> => {
   try {
     const formData = new FormData();
@@ -62,4 +62,3 @@ export const uploadFile = async (
 export const fileService = {
   uploadFile,
 };
-

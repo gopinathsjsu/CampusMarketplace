@@ -211,25 +211,5 @@ router.delete('/delete-multiple', authenticate, [
   });
 }));
 
-// @route   DELETE /api/file/:key(*)
-// @desc    Delete a file from S3 by key
-// @access  Private
-router.delete('/:key(*)', authenticate, asyncHandler(async (req: AuthRequest, res: express.Response) => {
-  if (!isS3Configured()) {
-    throw createError('S3 upload service is not configured', 503);
-  }
-
-  const key = req.params.key;
-  if (!key) {
-    throw createError('File key is required', 400);
-  }
-
-  await deleteFromS3(key);
-
-  res.json({
-    success: true,
-    message: 'File deleted successfully'
-  });
-}));
 
 export default router;

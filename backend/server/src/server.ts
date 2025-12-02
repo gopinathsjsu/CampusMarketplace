@@ -33,6 +33,7 @@ import chatRoutes from '@/routes/chat';
 import adminRoutes from '@/routes/admin';
 import recordsRoutes from '@/routes/records';
 import fileRoutes from '@/routes/file';
+import aiRoutes from '@/routes/ai';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -130,6 +131,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/records', recordsRoutes);
 app.use('/api/file', fileRoutes);
+app.use('/api/ai', aiRoutes);
 
 
 // Error handling middleware (must be last)

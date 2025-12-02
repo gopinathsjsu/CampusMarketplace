@@ -10,6 +10,7 @@ interface InputProps {
   required?: boolean;
   disabled?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ export default function Input({
   required = false,
   disabled = false,
   onChange,
+  onKeyDown,
   className: customClassName,
 }: InputProps) {
   const sizeClasses = (() => {
@@ -52,6 +54,7 @@ export default function Input({
       required={required}
       disabled={disabled}
       onChange={onChange}
+      onKeyDown={onKeyDown}
     />
   );
 }

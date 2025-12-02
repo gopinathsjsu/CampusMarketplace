@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Button from '../button';
 import UserMenu from '../userMenu/UserMenu.tsx';
 import { useUser } from '../../context/userDTO.tsx';
-import CreateListingModal from './components/CreateListingModal.tsx';
+import CreateListingModal from '../listing/CreateListingModal.tsx';
 
 export default function Header() {
   const navigate = useNavigate();

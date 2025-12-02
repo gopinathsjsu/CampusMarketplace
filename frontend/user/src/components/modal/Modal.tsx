@@ -37,7 +37,7 @@ export default function Modal({
       )}
       
       <div 
-        className="relative bg-white rounded-3xl px-6 py-12 max-w-md w-full mx-4"
+        className="relative bg-white rounded-3xl px-6 py-12 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto"
         style={modalStyle}
         onClick={(e) => e.stopPropagation()}
       >

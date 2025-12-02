@@ -5,7 +5,6 @@ interface ButtonProps {
   onClick?: () => void;
   size?: 'base' | 'lg' | string;
   bold?: boolean;
-  type?: 'button' | 'submit' | 'reset';
 }
 
 export default function Button({
@@ -14,8 +13,7 @@ export default function Button({
     onClick,
     rounded,
     size = 'base',
-    bold = true,
-    type = 'button',
+    bold = true
 }: ButtonProps) {
 
   const sizeClasses = (() => {
@@ -30,7 +28,7 @@ export default function Button({
   })();
 
   const weightClass = bold ? 'font-bold' : 'font-normal';
-  const baseClasses = `${sizeClasses} ${weightClass} text-white cursor-pointer`;
+  const baseClasses = `${sizeClasses} ${weightClass} text-white`;
   const roundedClasses = rounded
     ? 'rounded-full'
     : (size === 'lg' ? 'rounded-2xl' : 'rounded-xl');
@@ -40,7 +38,6 @@ export default function Button({
     <button
       className={className}
       style={{ backgroundColor: color }}
-      type={type}
       onClick={onClick}
     >
       {text}

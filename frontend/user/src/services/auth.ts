@@ -1,4 +1,6 @@
 import type { UserDTO } from "../context/userDTO.tsx";
+import { API } from "../routes/api.ts";
+
 export interface RegisterRequest {
   email: string;
   userName: string;
@@ -51,8 +53,6 @@ export interface BasicSuccessResponse {
   message: string;
 }
 
-const BASE_URL = `${import.meta.env.VITE_APP_API_BASE_URL}/auth`;
-
 class ApiError extends Error {
   public status: number;
 
@@ -94,21 +94,21 @@ function authHeader(token?: string): Record<string, string> {
 }
 
 const signUp = async (request: RegisterRequest): Promise<AuthSuccessResponse> => {
-  return requestJson<AuthSuccessResponse>(`${BASE_URL}/sign-up`, {
+  return requestJson<AuthSuccessResponse>(API.auth.signUp, {
     method: 'POST',
     body: JSON.stringify(request),
   });
 };
 
 const signIn = async (request: LoginRequest): Promise<AuthSuccessResponse> => {
-  return requestJson<AuthSuccessResponse>(`${BASE_URL}/sign-in`, {
+  return requestJson<AuthSuccessResponse>(API.auth.signIn, {
     method: 'POST',
     body: JSON.stringify(request),
   });
 };
 
 const getMe = async (accessToken: string): Promise<MeSuccessResponse> => {
-  return requestJson<MeSuccessResponse>(`${BASE_URL}/me`, {
+  return requestJson<MeSuccessResponse>(API.auth.me, {
     headers: {
       ...authHeader(accessToken),
     },
@@ -119,7 +119,7 @@ const updateProfile = async (
   accessToken: string,
   updates: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
-  return requestJson<UpdateProfileResponse>(`${BASE_URL}/profile`, {
+  return requestJson<UpdateProfileResponse>(API.auth.profile, {
     method: 'PUT',
     headers: {
       ...authHeader(accessToken),
@@ -132,7 +132,7 @@ const changePassword = async (
   accessToken: string,
   payload: ChangePasswordRequest
 ): Promise<BasicSuccessResponse> => {
-  return requestJson<BasicSuccessResponse>(`${BASE_URL}/change-password`, {
+  return requestJson<BasicSuccessResponse>(API.auth.changePassword, {
     method: 'POST',
     headers: {
       ...authHeader(accessToken),

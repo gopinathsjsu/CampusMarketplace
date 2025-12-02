@@ -49,8 +49,7 @@ export default function Notification({
     <div
       className={`
         fixed z-50 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border font-medium
-        transition-all duration-300 ease-in-out max-w-sm
-        left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+        transition-all duration-300 ease-in-out max-w-sm bottom-4 right-4
         ${getTypeStyles()}
         ${isAnimating ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}
       `}

@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Button from "../../components/button";
 import Input from "../../components/input";
@@ -44,23 +44,9 @@ export default function SignIn() {
       setUser(user);
       navigate('/');
     } catch (err) {
-      let message = 'Failed to sign in';
-
-      if (err instanceof ApiError) {
-        if (err.status === 401) {
-          message = 'Invalid email or password';
-        } else if (err.message) {
-          message = err.message;
-        }
-      }
-
+      const message = err instanceof ApiError ? err.message : 'Failed to sign in';
       setNotification({ show: true, message, type: 'error' });
     }
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    handleSignIn();
   };
 
   const handleSignUp = () => {
@@ -68,7 +54,7 @@ export default function SignIn() {
   };
 
   return (
-    <div>
+    <div className="px-8 py-6 bg-white h-screen">
       <Modal
         isOpen={true}
         width={"500px"}
@@ -76,7 +62,7 @@ export default function SignIn() {
         onClose={() => {
         }}
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-6">
           <h1 className="text-3xl font-bold text-center" style={{ color: "#1F55A2" }}>Sign In</h1>
 
           <div className="space-y-4">
@@ -104,7 +90,7 @@ export default function SignIn() {
               <Button
                 text="Sign In"
                 size={"lg"}
-                type="submit"
+                onClick={handleSignIn}
               />
             </div>
             <div className="w-full">
@@ -116,7 +102,7 @@ export default function SignIn() {
               />
             </div>
           </div>
-        </form>
+        </div>
       </Modal>
       <Notification
         message={notification.message}

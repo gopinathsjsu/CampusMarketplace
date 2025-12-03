@@ -12,6 +12,8 @@ export interface IProduct extends Document {
   buyerId?: mongoose.Types.ObjectId | null;
   status: 'available' | 'sold' | 'pending';
   location: string;
+  latitude?: number | null;
+  longitude?: number | null;
   tags: string[];
   views: number;
   isReported: boolean;
@@ -83,6 +85,14 @@ const productSchema = new Schema<IProduct>({
     required: [true, 'Location is required'],
     trim: true
   },
+  latitude: {
+    type: Number,
+    default: null
+  },
+  longitude: {
+    type: Number,
+    default: null
+  },
   tags: [{
     type: String,
     trim: true,
@@ -114,6 +124,7 @@ productSchema.index({ status: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ createdAt: -1 });
 productSchema.index({ title: 'text', description: 'text', tags: 'text' });
+productSchema.index({ latitude: 1, longitude: 1 });
 
 // Virtual for seller information
 productSchema.virtual('sellerInfo', {

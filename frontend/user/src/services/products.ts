@@ -41,6 +41,12 @@ async function create(payload: CreateProductPayload): Promise<CreateProductRespo
   form.append('category', payload.category);
   form.append('condition', payload.condition);
   form.append('location', payload.location);
+  // If location is "lat,lng", also send latitude/longitude for backend to reverse geocode and store
+  const match = payload.location?.trim().match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+  if (match) {
+    form.append('latitude', match[1]);
+    form.append('longitude', match[2]);
+  }
   payload.tags.forEach((t) => form.append('tags', t));
   payload.images.forEach((file) => form.append('images', file));
 

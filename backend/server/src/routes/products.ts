@@ -6,6 +6,7 @@ import { authenticate, authorize, optionalAuth, AuthRequest } from '@/middleware
 import { asyncHandler, createError } from '@/middleware/errorHandler';
 import { validateRequest } from '@/middleware/validation';
 import { uploadMultipleToS3, deleteMultipleFromS3, extractKeyFromUrl } from '@/services/file';
+import { reverseGeocode } from '@/services/geocoding';
 
 const router = express.Router();
 
@@ -147,9 +148,8 @@ router.post('/', authenticate, authorize('seller', 'admin'), upload.array('image
     .isIn(['new', 'like-new', 'good', 'fair', 'poor'])
     .withMessage('Invalid condition'),
   body('location')
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage('Location is required'),
+    .optional()
+    .trim(),
   body('tags')
     .optional()
     .customSanitizer((v) => {
@@ -169,9 +169,55 @@ router.post('/', authenticate, authorize('seller', 'admin'), upload.array('image
     throw createError('At least one image is required', 400);
   }
 
+  // Parse coordinates if provided
+  let latRaw = (req.body.latitude ?? req.body.lat) as string | undefined;
+  let lngRaw = (req.body.longitude ?? req.body.lng) as string | undefined;
+  // If coordinates not provided explicitly, try to parse from "location" as "lat,lng"
+  if ((!latRaw || !lngRaw) && typeof location === 'string') {
+    const match = location.trim().match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if (match) {
+      latRaw = match[1];
+      lngRaw = match[2];
+    }
+  }
+  let latitude = latRaw !== undefined ? parseFloat(latRaw) : undefined;
+  let longitude = lngRaw !== undefined ? parseFloat(lngRaw) : undefined;
+
+  // Ensure we have either a text location or coordinates
+  if ((!location || String(location).trim().length === 0) &&
+      (latitude === undefined || Number.isNaN(latitude) || longitude === undefined || Number.isNaN(longitude))) {
+    throw createError('Location or valid latitude/longitude is required', 400);
+  }
+
   // Process uploaded images to S3
   const uploadResults = await uploadMultipleToS3(files, { folder: 'products' });
   const images = uploadResults.map(result => result.fileUrl);
+
+  // Resolve human-readable location whenever coordinates are available,
+  // or when the provided location is a "lat,lng" string.
+  let resolvedLocation = (location || '').toString().trim();
+  const locationLooksLikeCoords = typeof location === 'string' &&
+    /^\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*$/.test(location);
+  if ((latitude !== undefined && !Number.isNaN(latitude) &&
+       longitude !== undefined && !Number.isNaN(longitude)) || locationLooksLikeCoords) {
+    try {
+      // If coordinates came from the location string, ensure numbers are set
+      if (locationLooksLikeCoords && (latitude === undefined || Number.isNaN(latitude) || longitude === undefined || Number.isNaN(longitude))) {
+        const m = (location as string).trim().match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+        if (m) {
+          latitude = parseFloat(m[1]);
+          longitude = parseFloat(m[2]);
+        }
+      }
+      if (latitude !== undefined && !Number.isNaN(latitude) &&
+          longitude !== undefined && !Number.isNaN(longitude)) {
+        const name = await reverseGeocode(latitude, longitude);
+        if (name) {
+          resolvedLocation = name;
+        }
+      }
+    } catch {}
+  }
 
   const product = await Product.create({
     title,
@@ -179,7 +225,9 @@ router.post('/', authenticate, authorize('seller', 'admin'), upload.array('image
     price: parseFloat(price),
     category,
     condition,
-    location,
+    location: resolvedLocation || 'Unknown location',
+    latitude: latitude !== undefined && !Number.isNaN(latitude) ? latitude : null,
+    longitude: longitude !== undefined && !Number.isNaN(longitude) ? longitude : null,
     tags: Array.isArray(tags) ? tags : tags.split(',').map((tag: string) => tag.trim()),
     images,
     sellerId: req.user!._id
@@ -246,6 +294,44 @@ router.put('/:id', authenticate, upload.array('images', 5), [
     const uploadResults = await uploadMultipleToS3(files, { folder: 'products' });
     const newImages = uploadResults.map(result => result.fileUrl);
     req.body.images = [...(product.images || []), ...newImages];
+  }
+
+  // Parse and normalize coordinates if provided
+  const latRaw = (req.body.latitude ?? req.body.lat) as string | undefined;
+  const lngRaw = (req.body.longitude ?? req.body.lng) as string | undefined;
+  const latitude = latRaw !== undefined ? parseFloat(latRaw) : undefined;
+  const longitude = lngRaw !== undefined ? parseFloat(lngRaw) : undefined;
+  if (latitude !== undefined && !Number.isNaN(latitude)) {
+    req.body.latitude = latitude;
+  }
+  if (longitude !== undefined && !Number.isNaN(longitude)) {
+    req.body.longitude = longitude;
+  }
+
+  // If coordinates present OR provided location is a "lat,lng" string, attempt reverse geocode.
+  const hasCoords = (latitude !== undefined && !Number.isNaN(latitude)) &&
+                    (longitude !== undefined && !Number.isNaN(longitude));
+  const providedLocation = req.body.location as string | undefined;
+  const looksLikeCoords = typeof providedLocation === 'string' &&
+    /^\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*$/.test(providedLocation);
+  if (looksLikeCoords && !hasCoords) {
+    const m = providedLocation!.trim().match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if (m) {
+      req.body.latitude = parseFloat(m[1]);
+      req.body.longitude = parseFloat(m[2]);
+    }
+  }
+  if (hasCoords || looksLikeCoords) {
+    try {
+      const lat = (req.body.latitude ?? latitude) as number | undefined;
+      const lng = (req.body.longitude ?? longitude) as number | undefined;
+      if (typeof lat === 'number' && typeof lng === 'number' && !Number.isNaN(lat) && !Number.isNaN(lng)) {
+        const name = await reverseGeocode(lat, lng);
+        if (name) {
+          req.body.location = name;
+        }
+      }
+    } catch {}
   }
 
   // Update product

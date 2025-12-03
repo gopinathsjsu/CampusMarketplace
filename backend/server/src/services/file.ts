@@ -19,6 +19,15 @@ export interface UploadResult {
 }
 
 /**
+ * Convert a string to ASCII-only by removing diacritics and non-ASCII chars.
+ * S3 user-defined metadata must be ASCII; non-ASCII can cause signature errors.
+ */
+const toAscii = (value: string): string => {
+  const normalized = value.normalize('NFKD');
+  return normalized.replace(/[^\x00-\x7F]/g, '');
+};
+
+/**
  * Upload a file to S3 using AWS_S3_REQUEST_URL
  * @param file - Multer file object
  * @param options - Upload options
@@ -79,7 +88,8 @@ export const uploadToS3 = async (
         // Note: Public access is configured via bucket policy (see README for setup)
         // Add metadata
         Metadata: {
-          originalName: file.originalname,
+          // S3 metadata values must be ASCII-only. Remove diacritics and non-ASCII.
+          originalName: toAscii(file.originalname) || `${sanitizedFilename}${fileExtension}`,
           uploadedAt: new Date().toISOString()
         }
       }

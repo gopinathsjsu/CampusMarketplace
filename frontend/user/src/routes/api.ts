@@ -31,6 +31,7 @@ export const API = {
     list: `${BASE_URL}/users`,
     byId: (id: string) => `${BASE_URL}/users/${id}`,
     productsByUser: (id: string) => `${BASE_URL}/users/${id}/products`,
+    purchasesByUser: (id: string) => `${BASE_URL}/users/${id}/purchases`,
     uploadProfilePicture: `${BASE_URL}/users/profilePicture`,
     deleteById: (id: string) => `${BASE_URL}/users/${id}`,
   },

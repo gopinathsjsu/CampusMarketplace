@@ -8,7 +8,8 @@ export interface IProduct extends Document {
   category: string;
   condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
   images: string[];
-  seller: mongoose.Types.ObjectId;
+  sellerId: mongoose.Types.ObjectId;
+  buyerId?: mongoose.Types.ObjectId | null;
   status: 'available' | 'sold' | 'pending';
   location: string;
   tags: string[];
@@ -62,10 +63,15 @@ const productSchema = new Schema<IProduct>({
     type: String,
     required: true
   }],
-  seller: {
+  sellerId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: [true, 'Seller is required']
+  },
+  buyerId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
   },
   status: {
     type: String,
@@ -101,7 +107,8 @@ const productSchema = new Schema<IProduct>({
 });
 
 // Indexes for better query performance
-productSchema.index({ seller: 1 });
+productSchema.index({ sellerId: 1 });
+productSchema.index({ buyerId: 1 });
 productSchema.index({ category: 1 });
 productSchema.index({ status: 1 });
 productSchema.index({ price: 1 });
@@ -111,7 +118,7 @@ productSchema.index({ title: 'text', description: 'text', tags: 'text' });
 // Virtual for seller information
 productSchema.virtual('sellerInfo', {
   ref: 'User',
-  localField: 'seller',
+  localField: 'sellerId',
   foreignField: '_id',
   justOne: true
 });

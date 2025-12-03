@@ -93,7 +93,7 @@ const seedData = async () => {
         category: 'textbooks',
         condition: 'good',
         images: ['/uploads/listings/sample1.jpg'],
-        seller: users[1]._id, // John Seller
+        sellerId: users[1]._id, // John Seller
         location: 'SJSU Campus',
         tags: ['software-engineering', 'design-patterns', 'cmpe202']
       },
@@ -104,7 +104,7 @@ const seedData = async () => {
         category: 'electronics',
         condition: 'like-new',
         images: ['/uploads/listings/sample2.jpg'],
-        seller: users[3]._id, // Mike Student
+        sellerId: users[3]._id, // Mike Student
         location: 'South Campus',
         tags: ['macbook', 'laptop', 'apple', 'm1']
       },
@@ -115,7 +115,7 @@ const seedData = async () => {
         category: 'furniture',
         condition: 'like-new',
         images: ['/uploads/listings/sample3.jpg'],
-        seller: users[1]._id, // John Seller
+        sellerId: users[1]._id, // John Seller
         location: 'Campus Village',
         tags: ['desk-lamp', 'ikea', 'study']
       },
@@ -126,7 +126,7 @@ const seedData = async () => {
         category: 'textbooks',
         condition: 'good',
         images: ['/uploads/listings/sample4.jpg'],
-        seller: users[4]._id, // Sarah Chen
+        sellerId: users[4]._id, // Sarah Chen
         location: 'Engineering Building',
         tags: ['calculus', 'math', 'textbook-bundle']
       },
@@ -137,7 +137,7 @@ const seedData = async () => {
         category: 'furniture',
         condition: 'good',
         images: ['/uploads/listings/sample5.jpg'],
-        seller: users[3]._id, // Mike Student
+        sellerId: users[3]._id, // Mike Student
         location: 'Off-campus Housing',
         tags: ['gaming-chair', 'ergonomic', 'furniture']
       },
@@ -148,7 +148,7 @@ const seedData = async () => {
         category: 'electronics',
         condition: 'good',
         images: ['/uploads/listings/sample6.jpg'],
-        seller: users[4]._id, // Sarah Chen
+        sellerId: users[4]._id, // Sarah Chen
         location: 'Student Union',
         tags: ['iphone', 'smartphone', 'apple']
       },
@@ -159,7 +159,7 @@ const seedData = async () => {
         category: 'textbooks',
         condition: 'fair',
         images: ['/uploads/listings/sample7.jpg'],
-        seller: users[1]._id, // John Seller
+        sellerId: users[1]._id, // John Seller
         location: 'Library',
         tags: ['algorithms', 'data-structures', 'computer-science']
       },
@@ -170,7 +170,7 @@ const seedData = async () => {
         category: 'electronics',
         condition: 'good',
         images: ['/uploads/listings/sample8.jpg'],
-        seller: users[3]._id, // Mike Student
+        sellerId: users[3]._id, // Mike Student
         location: 'Engineering Building',
         tags: ['keyboard', 'mechanical', 'programming', 'rgb']
       }

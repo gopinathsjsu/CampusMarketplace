@@ -81,7 +81,7 @@ router.get('/', [
 
   const [products, total] = await Promise.all([
     Product.find(filter)
-      .populate('seller', 'userName profilePicture firstName lastName avatar university schoolName')
+      .populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName')
       .sort(sort)
       .skip(skip)
       .limit(limitNum)
@@ -108,14 +108,14 @@ router.get('/', [
 // @access  Public
 router.get('/:id', optionalAuth, asyncHandler(async (req: AuthRequest, res: express.Response) => {
   const product = await Product.findById(req.params.id)
-    .populate('seller', 'userName profilePicture firstName lastName avatar university schoolName phone email');
+    .populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName phone email');
 
   if (!product) {
     throw createError('Product not found', 404);
   }
 
   // Increment view count if user is not the seller
-  if (!req.user || req.user._id.toString() !== product.seller._id.toString()) {
+  if (!req.user || req.user._id.toString() !== (product as any).sellerId._id.toString()) {
     await product.incrementViews();
   }
 
@@ -152,8 +152,15 @@ router.post('/', authenticate, authorize('seller', 'admin'), upload.array('image
     .withMessage('Location is required'),
   body('tags')
     .optional()
+    .customSanitizer((v) => {
+      if (Array.isArray(v)) return v;
+      if (typeof v === 'string') {
+        return v.split(',').map((t: string) => t.trim()).filter(Boolean);
+      }
+      return [];
+    })
     .isArray()
-    .withMessage('Tags must be an array')
+    .withMessage('Tags must be an array or comma-separated string')
 ], validateRequest, asyncHandler(async (req: AuthRequest, res: express.Response) => {
   const { title, description, price, category, condition, location, tags = [] } = req.body;
   const files = req.files as Express.Multer.File[];
@@ -175,10 +182,10 @@ router.post('/', authenticate, authorize('seller', 'admin'), upload.array('image
     location,
     tags: Array.isArray(tags) ? tags : tags.split(',').map((tag: string) => tag.trim()),
     images,
-    seller: req.user!._id
+    sellerId: req.user!._id
   });
 
-  await product.populate('seller', 'userName profilePicture firstName lastName avatar university schoolName');
+  await product.populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName');
 
   res.status(201).json({
     success: true,
@@ -229,7 +236,7 @@ router.put('/:id', authenticate, upload.array('images', 5), [
     throw createError('Product not found', 404);
   }
 
-  if (product.seller.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
+  if ((product as any).sellerId.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
     throw createError('Not authorized to update this product', 403);
   }
 
@@ -249,7 +256,7 @@ router.put('/:id', authenticate, upload.array('images', 5), [
   });
 
   await product.save();
-  await product.populate('seller', 'userName profilePicture firstName lastName avatar university schoolName');
+  await product.populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName');
 
   res.json({
     success: true,
@@ -268,7 +275,7 @@ router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: e
     throw createError('Product not found', 404);
   }
 
-  if (product.seller.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
+  if ((product as any).sellerId.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
     throw createError('Not authorized to delete this product', 403);
   }
 

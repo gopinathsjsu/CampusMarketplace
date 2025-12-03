@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { UserData, ListingData } from '../../types';
 import { API } from '../../routes/api.ts';
+import ListingDetailsModal from './ListingDetailsModal';
 
 export interface ListingProps {
   data: ListingData;
@@ -31,6 +32,7 @@ async function getUser(userId: string): Promise<UserData | null> {
 export default function Listing({ data }: ListingProps) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -47,8 +49,22 @@ export default function Listing({ data }: ListingProps) {
     fetchUser();
   }, [data.userId]);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setIsDetailsOpen(true);
+    }
+  };
+
   return (
-    <div className="bg-white " style={{ width: '455px', height: '320px' }}>
+    <div
+      className="bg-white cursor-pointer"
+      style={{ width: '455px', height: '320px' }}
+      onClick={() => setIsDetailsOpen(true)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
       <div className="relative z-10" style={{ height: '232px' }}>
         <img
           src={data.photos[0]}
@@ -68,7 +84,7 @@ export default function Listing({ data }: ListingProps) {
               <img
                 src={userData?.profilePicture || 'https://via.placeholder.com/40'}
                 alt={userData?.displayName || 'User'}
-                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                className="w-10 h-10 rounded-full object-cover shadow-sm"
               />
             )}
             <div className="text-right">
@@ -84,6 +100,11 @@ export default function Listing({ data }: ListingProps) {
           </div>
         </div>
       </div>
+      <ListingDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        listingId={data.listingId}
+      />
     </div>
   );
 }

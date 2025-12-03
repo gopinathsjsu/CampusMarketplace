@@ -135,7 +135,7 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} backgroundColor="#FFFFFF">
+    <Modal isOpen={isOpen} onClose={onClose} width={'25vw'}>
       <div className="flex flex-col text-left">
         <h2 className="text-3xl font-bold mb-6">Create Listing</h2>
 

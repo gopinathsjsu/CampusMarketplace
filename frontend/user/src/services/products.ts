@@ -19,6 +19,27 @@ export interface CreateProductResponse {
   };
 }
 
+export interface ProductData {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  category: string;
+  condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
+  location: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  images: string[];
+  tags?: string[];
+}
+
+export interface GetProductByIdResponse {
+  success: boolean;
+  data: {
+    product: ProductData;
+  };
+}
+
 class ProductApiError extends Error {
   public status: number;
   constructor(status: number, message: string) {
@@ -61,8 +82,25 @@ async function create(payload: CreateProductPayload): Promise<CreateProductRespo
   return data as CreateProductResponse;
 }
 
+async function getById(id: string): Promise<GetProductByIdResponse> {
+  const res = await fetch(API.products.byId(id), {
+    method: 'GET',
+    headers: {
+      ...authHeader(),
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = (data && (data.message || data.detail)) || 'Failed to load product';
+    throw new ProductApiError(res.status, message);
+  }
+  return data as GetProductByIdResponse;
+}
+
 export const productService = {
   create,
+  getById,
 };
 
 export { ProductApiError };

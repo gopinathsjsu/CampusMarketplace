@@ -86,7 +86,7 @@ function Profile() {
   const avatarSrc = user?.profilePicture || '/favicon.ico';
   const displayName = user?.displayName || user?.userName || 'User';
   return (
-    <div className="px-8 py-6 bg-white">
+    <div className="px-24 py-6 bg-white">
       <div className="grid lg:grid-cols-2">
         <div className="flex flex-col items-center justify-start mt-8 lg:sticky lg:top-1/2 lg:-translate-y-1/2 self-start">
           <div className="w-[320px] h-[320px] rounded-full overflow-hidden">

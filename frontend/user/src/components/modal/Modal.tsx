@@ -33,7 +33,7 @@ export default function Modal({
       {mask && <div className="absolute inset-0 bg-black/25" onClick={handleOverlayClick} />}
 
       <div
-        className="relative bg-white rounded-3xl px-6 py-12 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto"
+        className="relative bg-white rounded-3xl px-12 py-12 max-w-[90vw] w-full mx-4 max-h-[90vh] overflow-y-auto"
         style={modalStyle}
         onClick={(e) => e.stopPropagation()}
       >

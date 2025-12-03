@@ -55,7 +55,7 @@ router.get('/', authenticate, [
 router.get('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: express.Response) => {
   const chat = await Chat.findById(req.params.id)
     .populate('participants', 'userName profilePicture firstName lastName avatar')
-    .populate('product', 'title price images status seller')
+    .populate('product', 'title price images status sellerId')
     .populate('messages.sender', 'userName profilePicture firstName lastName avatar');
 
   if (!chat) {

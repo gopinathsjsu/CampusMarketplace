@@ -44,15 +44,15 @@ const run = async () => {
       category: 'textbooks',
       condition: 'new',
       images: ['test.jpg'],
-      seller: user._id,
+    sellerId: user._id,
       location: 'Library',
       status: 'available'
     });
 
     const populatedProduct = await Product.findById(product._id)
-      .populate('seller', 'userName profilePicture firstName lastName avatar university schoolName');
+    .populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName');
     
-    const seller = populatedProduct?.seller as any;
+  const seller = (populatedProduct as any)?.sellerId as any;
     if (seller.firstName === 'Eugene') {
       console.log('✅ Product populate works (virtuals visible).');
     } else {

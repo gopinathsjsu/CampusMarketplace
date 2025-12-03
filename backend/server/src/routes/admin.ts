@@ -26,7 +26,7 @@ router.get('/dashboard', authenticate, authorize('admin'), asyncHandler(async (r
     Chat.countDocuments(),
     Product.countDocuments({ isReported: true }),
     User.find().sort({ createdAt: -1 }).limit(5).select('userName schoolName email createdAt'),
-    Product.find().sort({ createdAt: -1 }).limit(5).populate('seller', 'userName firstName lastName')
+    Product.find().sort({ createdAt: -1 }).limit(5).populate('sellerId', 'userName firstName lastName')
   ]);
 
   // Get user statistics by role
@@ -80,7 +80,7 @@ router.get('/reported-products', authenticate, authorize('admin'), [
 
   const [products, total] = await Promise.all([
     Product.find({ isReported: true })
-      .populate('seller', 'userName profilePicture email schoolName firstName lastName university')
+      .populate('sellerId', 'userName profilePicture email schoolName firstName lastName university')
       .populate('reportedBy', 'userName profilePicture email firstName lastName')
       .sort({ updatedAt: -1 })
       .skip(skip)
@@ -168,7 +168,7 @@ router.get('/users/:id/activity', authenticate, authorize('admin'), asyncHandler
 
   const [user, products, chats] = await Promise.all([
     User.findById(userId).select('-password'),
-    Product.find({ seller: userId }).sort({ createdAt: -1 }),
+    Product.find({ sellerId: userId }).sort({ createdAt: -1 }),
     Chat.find({ participants: userId }).populate('product', 'title').sort({ lastActivity: -1 })
   ]);
 
@@ -228,7 +228,7 @@ router.get('/analytics', authenticate, authorize('admin'), asyncHandler(async (r
       { $limit: 10 }
     ]),
     Product.aggregate([
-      { $group: { _id: '$seller', count: { $sum: 1 } } },
+      { $group: { _id: '$sellerId', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 },
       { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'seller' } },

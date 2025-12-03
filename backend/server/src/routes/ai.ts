@@ -49,7 +49,7 @@ router.post('/search', [
 
   // 2. Query Database
   const products = await Product.find(filters)
-    .populate('seller', 'userName profilePicture firstName lastName avatar university schoolName')
+    .populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName')
     .sort({ createdAt: -1 })
     .limit(20);
 

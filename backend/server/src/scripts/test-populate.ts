@@ -41,7 +41,7 @@ const run = async () => {
       category: 'textbooks',
       condition: 'new',
       images: ['test.jpg'],
-      seller: seller._id,
+    sellerId: seller._id,
       location: 'Library'
     });
 

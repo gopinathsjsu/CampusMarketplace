@@ -113,7 +113,7 @@ router.get('/:id', asyncHandler(async (req: express.Request, res: express.Respon
 
   // Get user's active listings count
   const listingsCount = await Product.countDocuments({
-    seller: user._id,
+    sellerId: user._id,
     status: 'available'
   });
 
@@ -152,12 +152,12 @@ router.get('/:id/products', [
     throw createError('User not found', 404);
   }
 
-  const filter: any = { seller: req.params.id };
+  const filter: any = { sellerId: req.params.id };
   if (status) filter.status = status;
 
   const [products, total] = await Promise.all([
     Product.find(filter)
-      .populate('seller', 'userName profilePicture firstName lastName avatar university schoolName')
+      .populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum),
@@ -232,7 +232,7 @@ router.delete('/:id', authenticate, authorize('admin'), asyncHandler(async (req:
   }
 
   // Delete user's products and associated images
-  const userProducts = await Product.find({ seller: user._id });
+  const userProducts = await Product.find({ sellerId: user._id });
   for (const product of userProducts) {
     // Delete product images
     product.images.forEach(imagePath => {
@@ -244,7 +244,7 @@ router.delete('/:id', authenticate, authorize('admin'), asyncHandler(async (req:
   }
 
   // Delete products
-  await Product.deleteMany({ seller: user._id });
+  await Product.deleteMany({ sellerId: user._id });
 
   // Delete user
   await User.findByIdAndDelete(req.params.id);

@@ -26,7 +26,7 @@ db.createCollection('products', {
   validator: {
     $jsonSchema: {
       bsonType: 'object',
-      required: ['title', 'description', 'price', 'category', 'condition', 'seller'],
+      required: ['title', 'description', 'price', 'category', 'condition', 'sellerId'],
       properties: {
         category: {
           enum: ['textbooks', 'electronics', 'furniture', 'clothing', 'sports', 'supplies', 'other']
@@ -53,7 +53,8 @@ db.users.createIndex({ email: 1 }, { unique: true });
 db.users.createIndex({ university: 1 });
 db.users.createIndex({ role: 1 });
 
-db.products.createIndex({ seller: 1 });
+db.products.createIndex({ sellerId: 1 });
+db.products.createIndex({ buyerId: 1 });
 db.products.createIndex({ category: 1 });
 db.products.createIndex({ status: 1 });
 db.products.createIndex({ price: 1 });

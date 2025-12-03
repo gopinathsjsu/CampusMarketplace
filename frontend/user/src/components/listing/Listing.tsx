@@ -1,13 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import type { UserData, ListingData } from '../../types';
+import { API } from '../../routes/api.ts';
 
 export interface ListingProps {
   data: ListingData;
 }
 
 async function getUser(userId: string): Promise<UserData | null> {
-  // TODO: Implement actual API call when backend is ready
-  return null;
+  try {
+    if (!userId) return null;
+    const res = await fetch(API.users.byId(userId));
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return null;
+    const u = data?.data?.user || {};
+    const displayName: string = u.userName || [u.firstName, u.lastName].filter(Boolean).join(' ') || 'User';
+    const result: UserData = {
+      userName: u.userName || displayName,
+      displayName,
+      profilePicture: u.profilePicture || '',
+      schoolName: u.schoolName || '',
+      sellerRating: u.sellerRating || 0,
+      buyerRating: u.buyerRating || 0,
+    };
+    return result;
+  } catch {
+    return null;
+  }
 }
 
 export default function Listing({ data }: ListingProps) {

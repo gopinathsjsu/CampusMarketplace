@@ -178,6 +178,57 @@ router.get('/:id/products', [
   });
 }));
 
+// @route   GET /api/users/:id/purchases
+// @desc    Get products purchased by the user (by buyerId)
+// @access  Public
+router.get('/:id/purchases', [
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50'),
+  query('status').optional().isIn(['available', 'sold', 'pending']).withMessage('Invalid status')
+], validateRequest, asyncHandler(async (req: express.Request, res: express.Response) => {
+  const {
+    page = 1,
+    limit = 12,
+    status
+  } = req.query;
+
+  const pageNum = parseInt(page as string);
+  const limitNum = parseInt(limit as string);
+  const skip = (pageNum - 1) * limitNum;
+
+  // Check if user exists
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    throw createError('User not found', 404);
+  }
+
+  // Build filter for purchases
+  const filter: any = { buyerId: req.params.id };
+  if (status) filter.status = status;
+
+  const [products, total] = await Promise.all([
+    Product.find(filter)
+      .populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum),
+    Product.countDocuments(filter)
+  ]);
+
+  res.json({
+    success: true,
+    data: {
+      products,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum)
+      }
+    }
+  });
+}));
+
 // @route   POST /api/users/profilePicture
 // @desc    Upload user profilePicture
 // @access  Private

@@ -62,12 +62,16 @@ router.post('/sign-up', [
     throw createError('User with this email already exists', 400);
   }
 
+  // Generate a random DiceBear Identicon avatar if no profile picture provided
+  const randomSeed = Math.random().toString(36).substring(2, 15);
+  const defaultAvatar = `https://api.dicebear.com/9.x/identicon/svg?seed=${randomSeed}`;
+
   // Create user
   const user = await User.create({
     email,
     userName,
     password,
-    profilePicture: profilePicture || '',
+    profilePicture: profilePicture || defaultAvatar,
     schoolName
   });
 
@@ -88,26 +92,32 @@ router.post('/sign-up', [
 // @desc    Login user
 // @access  Public
 router.post('/sign-in', [
-  body('email')
-    .isEmail()
-    .withMessage('Please provide a valid email')
-    .normalizeEmail(),
+  body('identifier')
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage('Email or username is required'),
   body('password')
     .isLength({ min: 1 })
     .withMessage('Password is required')
 ], validateRequest, asyncHandler(async (req: express.Request, res: express.Response) => {
-  const { email, password } = req.body;
+  const { identifier, password } = req.body;
 
-  // Check if user exists and include password for comparison
-  const user = await User.findOne({ email }).select('+password');
+  // Check if user exists by email or username, include password for comparison
+  const user = await User.findOne({
+    $or: [
+      { email: identifier.toLowerCase() },
+      { userName: identifier }
+    ]
+  }).select('+password');
+  
   if (!user) {
-    throw createError('Invalid email or password', 401);
+    throw createError('Invalid email/username or password', 401);
   }
 
   // Check password
   const isPasswordValid = await user.comparePassword(password);
   if (!isPasswordValid) {
-    throw createError('Invalid email or password', 401);
+    throw createError('Invalid email/username or password', 401);
   }
 
   // Generate token

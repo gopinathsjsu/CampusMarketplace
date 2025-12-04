@@ -5,6 +5,7 @@ interface InputProps {
   placeholder?: string;
   value?: string;
   border?: boolean;
+  rounded?: boolean;
   width?: string;
   size?: 'base' | 'lg' | string;
   required?: boolean;
@@ -19,6 +20,7 @@ export default function Input({
   placeholder,
   value,
   border = true,
+  rounded,
   width,
   size = 'base',
   required = false,
@@ -30,15 +32,19 @@ export default function Input({
   const sizeClasses = (() => {
     switch (size) {
       case 'base':
-        return 'px-6 py-2 text-base rounded-full';
+        return 'px-6 py-2 text-base';
       case 'lg':
-        return 'px-6 py-2 text-lg rounded-2xl';
+        return 'px-10 py-2 text-lg';
       default:
-        return 'px-3 py-2 text-base rounded-xl';
+        return 'px-3 py-2 text-base';
     }
   })();
 
-  const baseClasses = `${sizeClasses} text-gray-700 bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed disabled:border-gray-200 placeholder:text-gray-400`;
+  const roundedClasses = rounded
+    ? 'rounded-full'
+    : (size === 'lg' ? 'rounded-2xl' : 'rounded-xl');
+
+  const baseClasses = `${sizeClasses} ${roundedClasses} text-gray-700 bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed disabled:border-gray-200 placeholder:text-gray-400`;
   const borderClasses = border ? 'border-2 border-gray-200 focus:border-blue-500' : '';
   const className = `${baseClasses} ${borderClasses} ${customClassName || ''}`.trim();
 

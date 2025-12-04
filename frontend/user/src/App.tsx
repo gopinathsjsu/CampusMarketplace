@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/header/Header.tsx';
 import SignIn from './pages/signIn/SignIn.tsx';
@@ -20,7 +20,7 @@ function App() {
                 <Home />
               </ProtectedRoute>
             }
-          /> {/* Route Home component to the root path */}
+          />
           <Route
             path="/profile"
             element={
@@ -31,6 +31,7 @@ function App() {
           />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
+          <Route path="*" element={<Navigate to="/sign-in" replace />} />
         </Routes>
       </div>
     </Router>

@@ -16,7 +16,8 @@ async function getUser(userId: string): Promise<UserData | null> {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return null;
     const u = data?.data?.user || {};
-    const displayName: string = u.userName || [u.firstName, u.lastName].filter(Boolean).join(' ') || 'User';
+    const displayName: string =
+      u.userName || [u.firstName, u.lastName].filter(Boolean).join(' ') || 'User';
     const result: UserData = {
       userName: u.userName || displayName,
       displayName,
@@ -89,7 +90,13 @@ export default function Listing({ data }: ListingProps) {
 
       <div className="bg-gray-100 pl-4 pr-4 pt-8 pb-4 rounded-b-3xl -translate-y-4">
         <div className="flex items-center justify-between">
-          <div className="text-3xl font-bold text-gray-900">${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <div className="text-3xl font-bold text-gray-900">
+            $
+            {data.price.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </div>
 
           <div className="flex items-center space-x-3">
             <div className="text-right">

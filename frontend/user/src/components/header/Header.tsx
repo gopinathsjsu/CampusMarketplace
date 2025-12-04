@@ -38,6 +38,10 @@ export default function Header() {
     navigate('/sign-in');
   };
 
+  const handleAdminClick = () => {
+    navigate('/admin');
+  };
+
   // Hide sign in button on sign in and sign up pages
   const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up';
 
@@ -56,6 +60,13 @@ export default function Header() {
           {!isAuthPage &&
             (user ? (
               <div className="flex items-center space-x-6">
+                {user.role === 'admin' && (
+                  <Button
+                    text="Admin Dashboard"
+                    onClick={handleAdminClick}
+                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                  />
+                )}
                 <img
                   src="/assets/icons/notification.svg"
                   alt="Notifications"

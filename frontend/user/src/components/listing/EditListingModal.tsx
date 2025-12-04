@@ -21,6 +21,7 @@ export default function EditListingModal({ isOpen, onClose, listingId, onUpdated
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Apparel');
+  const [condition, setCondition] = useState<'new' | 'like-new' | 'good' | 'fair' | 'poor'>('good');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,14 @@ export default function EditListingModal({ isOpen, onClose, listingId, onUpdated
     'Classifieds',
     'Electronics',
     'Entertainment',
+  ];
+
+  const conditions: { value: 'new' | 'like-new' | 'good' | 'fair' | 'poor'; label: string }[] = [
+    { value: 'new', label: 'New' },
+    { value: 'like-new', label: 'Like-new' },
+    { value: 'good', label: 'Good' },
+    { value: 'fair', label: 'Fair' },
+    { value: 'poor', label: 'Poor' },
   ];
 
   // Map backend categories to UI categories
@@ -64,6 +73,7 @@ export default function EditListingModal({ isOpen, onClose, listingId, onUpdated
         setDescription(p.description || '');
         setPrice(String(p.price || 0));
         setCategory(backendToUiCategory[p.category] || 'Classifieds');
+        setCondition(p.condition || 'good');
         setTags(p.tags || []);
         setImageUrl(p.images?.[0] || null);
         if (p.latitude != null && p.longitude != null) {
@@ -141,7 +151,7 @@ export default function EditListingModal({ isOpen, onClose, listingId, onUpdated
         description,
         price: numericPrice,
         category: mappedCategory,
-        condition: 'good',
+        condition,
         location: locString,
         tags,
         existingImages: [imageUrl],
@@ -216,7 +226,7 @@ export default function EditListingModal({ isOpen, onClose, listingId, onUpdated
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} width={'32vw'}>
+    <Modal isOpen={isOpen} onClose={onClose} width={'34vw'}>
       <div className="flex flex-col text-left">
         <h2 className="text-3xl font-bold mb-6">Edit Listing</h2>
 
@@ -224,7 +234,7 @@ export default function EditListingModal({ isOpen, onClose, listingId, onUpdated
         <div className="mb-4">
           <label className="block text-lg font-semibold mb-2 text-left">Image</label>
           <div
-            className="border-2 border-dashed border-gray-300 rounded-3xl h-40 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 overflow-hidden relative"
+            className="border-2 border-dashed border-gray-300 rounded-3xl h-[25vh] flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 overflow-hidden relative"
             onClick={() => !uploading && document.getElementById('edit-image-upload')?.click()}
           >
             {uploading ? (
@@ -275,6 +285,27 @@ export default function EditListingModal({ isOpen, onClose, listingId, onUpdated
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Condition */}
+        <div className="mb-4">
+          <label className="block text-lg font-semibold mb-2 text-left">Condition</label>
+          <div className="flex flex-wrap gap-2">
+            {conditions.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                onClick={() => setCondition(c.value)}
+                className={`px-4 py-2 rounded-full border-2 transition-colors ${
+                  condition === c.value
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Price */}

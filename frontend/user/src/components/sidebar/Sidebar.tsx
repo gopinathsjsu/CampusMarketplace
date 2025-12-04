@@ -89,7 +89,9 @@ export default function Sidebar({ search, onSearchChange, onCategorySelect, onCo
           rounded
           fullWidth
           size="lg"
-          rightIcon={<FontAwesomeIcon icon={faChevronRight} />}
+          rightIcon={<FontAwesomeIcon icon={faChevronRight} className={`transition-transform ${sellingMode ? 'rotate-90' : ''}`} />}
+          onClick={onSellingToggle}
+          variant={sellingMode ? 'primary' : 'primary'}
         />
       </div>
 

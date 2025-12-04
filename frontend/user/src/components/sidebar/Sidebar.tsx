@@ -15,9 +15,11 @@ import Button from '../button/Button.tsx';
 interface SidebarProps {
   search: string;
   onSearchChange: (value: string) => void;
+  sellingMode: boolean;
+  onSellingToggle: () => void;
 }
 
-export default function Sidebar({ search, onSearchChange }: SidebarProps) {
+export default function Sidebar({ search, onSearchChange, sellingMode, onSellingToggle }: SidebarProps) {
   return (
     <div className="w-90 bg-white p-10 space-y-6">
       {/* Search Bar */}
@@ -43,7 +45,9 @@ export default function Sidebar({ search, onSearchChange }: SidebarProps) {
           rounded
           fullWidth
           size="lg"
-          rightIcon={<FontAwesomeIcon icon={faChevronRight} />}
+          rightIcon={<FontAwesomeIcon icon={faChevronRight} className={`transition-transform ${sellingMode ? 'rotate-90' : ''}`} />}
+          onClick={onSellingToggle}
+          variant={sellingMode ? 'primary' : 'primary'}
         />
       </div>
 

@@ -143,10 +143,27 @@ async function purchase(id: string): Promise<PurchaseProductResponse> {
   return data as PurchaseProductResponse;
 }
 
+async function getByUserId(userId: string): Promise<GetAllProductsResponse> {
+  const res = await fetch(API.users.productsByUser(userId), {
+    method: 'GET',
+    headers: {
+      ...authHeader(),
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = (data && (data.message || data.detail)) || 'Failed to load user products';
+    throw new ProductApiError(res.status, message);
+  }
+  return data as GetAllProductsResponse;
+}
+
 export const productService = {
   create,
   getById,
   getAll,
+  getByUserId,
   purchase,
 };
 

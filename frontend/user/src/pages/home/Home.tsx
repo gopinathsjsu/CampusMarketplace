@@ -4,6 +4,7 @@ import Listing from '../../components/listing/Listing.tsx';
 import type { ListingData } from '../../types';
 import Button from '../../components/button/Button.tsx';
 import Sidebar from '../../components/sidebar/Sidebar.tsx';
+import { useUser } from '../../context/userDTO.tsx';
 
 // Helper to extract seller ID from ProductData
 function getSellerId(sellerId: ProductSellerInfo | string): string {
@@ -12,6 +13,7 @@ function getSellerId(sellerId: ProductSellerInfo | string): string {
 }
 
 export default function Home() {
+  const { user } = useUser();
   const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +25,12 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const [limit] = useState(12); // Number of items per page
   const [hasMore, setHasMore] = useState(true);
+  
+  // Selling mode state
+  const [sellingMode, setSellingMode] = useState(false);
+  const [sellingTab, setSellingTab] = useState<'active' | 'history'>('active');
+  const [myProducts, setMyProducts] = useState<ProductData[]>([]);
+  const [myProductsLoading, setMyProductsLoading] = useState(false);
 
   const fetchProducts = useCallback(async (params: GetAllProductsParams, append: boolean = false) => {
     setLoading(true);
@@ -54,44 +62,145 @@ export default function Home() {
     }
   }, [page, search, category, condition, minPrice, maxPrice, limit, fetchProducts]);
 
+  // Fetch user's own products when selling mode is activated
+  const fetchMyProducts = useCallback(async () => {
+    setMyProductsLoading(true);
+    setError(null);
+    try {
+      // Get user ID from localStorage or user context
+      const userId = localStorage.getItem('userId') || user?._id;
+      if (!userId) {
+        setError('Please sign in to view your listings');
+        setMyProductsLoading(false);
+        return;
+      }
+      const response = await productService.getByUserId(userId);
+      setMyProducts(response.data.products);
+    } catch (err) {
+      setError('Failed to fetch your products');
+      console.error('Error fetching user products:', err);
+    } finally {
+      setMyProductsLoading(false);
+    }
+  }, [user?._id]);
+
+  useEffect(() => {
+    if (sellingMode) {
+      fetchMyProducts();
+    }
+  }, [sellingMode, fetchMyProducts]);
+
+  const handleSellingToggle = () => {
+    setSellingMode(!sellingMode);
+    setSellingTab('active'); // Reset to active tab when toggling
+  };
+
+  // Filter products based on selling tab
+  const activeListings = myProducts.filter(p => p.status === 'available' || p.status === 'pending');
+  const historyListings = myProducts.filter(p => p.status === 'sold');
+  const displayedMyProducts = sellingTab === 'active' ? activeListings : historyListings;
+
 
   return (
     <div className="flex bg-gray-50 h-screen overflow-hidden">
       {/* Sidebar */}
-      <Sidebar search={search} onSearchChange={setSearch} />
+      <Sidebar 
+        search={search} 
+        onSearchChange={setSearch} 
+        sellingMode={sellingMode}
+        onSellingToggle={handleSellingToggle}
+      />
 
       {/* Main Content Area */}
-      <div className="flex-1 p-25 overflow-y-auto">
-        {loading && products.length === 0 ? (
-          <div className="text-center py-8">Loading products...</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">{error}</div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-8 text-gray-600">No products found.</div>
-        ) : (
-          <div className="grid grid-cols-2 gap-6 auto-rows-max">
-            {products.map((product) => (
-              <Listing key={product._id} data={{
-                listingId: product._id,
-                userId: getSellerId(product.sellerId),
-                description: product.description,
-                timeCreated: new Date(product.createdAt),
-                condition: product.condition,
-                photos: product.images,
-                location: product.location,
-                price: product.price,
-                sold: product.status === 'sold',
-                quantity: 1,
-                category: [product.category],
-              } as ListingData} />
-            ))}
+      <div className="flex-1 px-25 pt-10 overflow-y-auto">
+        {/* Title Section */}
+        {sellingMode ? (
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-8">
+              <button
+                onClick={() => setSellingTab('active')}
+                className={`text-5xl font-black transition-colors ${
+                  sellingTab === 'active' ? 'text-gray-900' : 'text-gray-300 hover:text-gray-500'
+                }`}
+              >
+                Active Listing
+              </button>
+            </div>
+            <div className="flex items-center mt-6 gap-8">
+              <button onClick={() => setSellingTab('history')} className="text-3xl font-bold transition-colors" style={{ color: '#1F55A2' }}>
+                History
+              </button>
+            </div>
           </div>
+        ) : (
+          <h1 className="text-5xl font-black text-gray-900 mb-6 text-left">For You</h1>
         )}
 
-        {hasMore && !loading && products.length > 0 && (
-          <div className="text-center py-8">
-            <Button onClick={handleLoadMore} text="Load More" />
-          </div>
+        {/* Product Grid */}
+        {sellingMode ? (
+          // Selling mode: show user's products
+          myProductsLoading ? (
+            <div className="text-center py-8">Loading your listings...</div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-500">{error}</div>
+          ) : displayedMyProducts.length === 0 ? (
+            <div className="text-center py-8 text-gray-600">
+              {sellingTab === 'active' ? 'No active listings.' : 'No sold items yet.'}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-6 auto-rows-max">
+              {displayedMyProducts.map((product) => (
+                <Listing key={product._id} data={{
+                  listingId: product._id,
+                  userId: getSellerId(product.sellerId),
+                  description: product.description,
+                  timeCreated: new Date(product.createdAt),
+                  condition: product.condition,
+                  photos: product.images,
+                  location: product.location,
+                  price: product.price,
+                  sold: product.status === 'sold',
+                  quantity: 1,
+                  category: [product.category],
+                } as ListingData} />
+              ))}
+            </div>
+          )
+        ) : (
+          // Browse mode: show all products
+          <>
+            {loading && products.length === 0 ? (
+              <div className="text-center py-8">Loading products...</div>
+            ) : error ? (
+              <div className="text-center py-8 text-red-500">{error}</div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-8 text-gray-600">No products found.</div>
+            ) : (
+              <div className="grid grid-cols-2 gap-6 auto-rows-max">
+                {products.map((product) => (
+                  <Listing key={product._id} data={{
+                    listingId: product._id,
+                    userId: getSellerId(product.sellerId),
+                    description: product.description,
+                    timeCreated: new Date(product.createdAt),
+                    condition: product.condition,
+                    photos: product.images,
+                    location: product.location,
+                    price: product.price,
+                    sold: product.status === 'sold',
+                    quantity: 1,
+                    category: [product.category],
+                  } as ListingData} />
+                ))}
+              </div>
+            )}
+
+            {hasMore && !loading && products.length > 0 && (
+              <div className="text-center py-8">
+                <Button onClick={handleLoadMore} text="Load More" />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

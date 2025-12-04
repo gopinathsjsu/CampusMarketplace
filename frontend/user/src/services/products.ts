@@ -119,10 +119,35 @@ async function getById(id: string): Promise<GetProductByIdResponse> {
   return data as GetProductByIdResponse;
 }
 
+export interface PurchaseProductResponse {
+  success: boolean;
+  message: string;
+  data: {
+    product: ProductData;
+  };
+}
+
+async function purchase(id: string): Promise<PurchaseProductResponse> {
+  const res = await fetch(API.products.purchase(id), {
+    method: 'POST',
+    headers: {
+      ...authHeader(),
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = (data && (data.message || data.detail)) || 'Failed to purchase product';
+    throw new ProductApiError(res.status, message);
+  }
+  return data as PurchaseProductResponse;
+}
+
 export const productService = {
   create,
   getById,
   getAll,
+  purchase,
 };
 
 export interface GetAllProductsResponse {

@@ -72,20 +72,11 @@ export default function Listing({ data }: ListingProps) {
         />
       </div>
 
-      <div className="bg-gray-100 px-8 pt-8 pb-4 rounded-b-3xl -translate-y-4">
+      <div className="bg-gray-100 pl-4 pr-4 pt-8 pb-4 rounded-b-3xl -translate-y-4">
         <div className="flex items-center justify-between">
-          <div className="text-3xl font-bold text-gray-900">${data.price.toFixed(2)}</div>
+          <div className="text-3xl font-bold text-gray-900">${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
 
           <div className="flex items-center space-x-3">
-            {loading ? (
-              <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
-            ) : (
-              <img
-                src={userData?.profilePicture}
-                alt={userData?.displayName || 'User'}
-                className="w-10 h-10 rounded-full object-cover shadow-sm"
-              />
-            )}
             <div className="text-right">
               <div className="font-bold text-gray-900 text-sm">
                 {loading ? (
@@ -96,6 +87,15 @@ export default function Listing({ data }: ListingProps) {
               </div>
               <div className="text-sm text-gray-600">{data.location}</div>
             </div>
+            {loading ? (
+              <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+            ) : (
+              <img
+                src={userData?.profilePicture}
+                alt={userData?.displayName || 'User'}
+                className="w-10 h-10 rounded-full object-cover shadow-sm"
+              />
+            )}
           </div>
         </div>
       </div>

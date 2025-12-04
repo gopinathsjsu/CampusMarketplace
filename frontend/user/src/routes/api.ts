@@ -44,6 +44,7 @@ export const API = {
     update: (id: string) => `${BASE_URL}/products/${id}`,
     delete: (id: string) => `${BASE_URL}/products/${id}`,
     report: (id: string) => `${BASE_URL}/products/${id}/report`,
+    purchase: (id: string) => `${BASE_URL}/products/${id}/purchase`,
   },
 
   // Chat endpoints

@@ -135,7 +135,7 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} width={'25vw'}>
+    <Modal isOpen={isOpen} onClose={onClose} width={'32vw'}>
       <div className="flex flex-col text-left">
         <h2 className="text-3xl font-bold mb-6">Create Listing</h2>
 
@@ -175,6 +175,7 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
             onChange={(e) => setTitle(e.target.value)}
             width="100%"
             size="base"
+            rounded={true}
           />
           {titleError && <p className="text-red-500 text-sm mt-1">{titleError}</p>}
         </div>
@@ -210,6 +211,7 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
               width="100%"
               size="base"
               className="pl-10"
+              rounded={true}
             />
           </div>
         </div>
@@ -226,6 +228,7 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
               onKeyDown={handleTagKeyDown}
               width="100%"
               size="base"
+              rounded={true}
             />
             <Button text="Add" size="base" rounded={true} onClick={addTag} type="button" />
           </div>

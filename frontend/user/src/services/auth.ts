@@ -9,7 +9,7 @@ export interface RegisterRequest {
 }
 
 export interface LoginRequest {
-  email: string;
+  identifier: string;
   password: string;
 }
 
@@ -76,7 +76,16 @@ async function requestJson<T>(url: string, options: RequestInit = {}): Promise<T
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      const message = (data && (data.message || data.detail)) || 'An error occurred';
+      let message = (data && (data.message || data.detail)) || 'An error occurred';
+      
+      // If there are validation errors, extract the specific messages
+      if (data?.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+        const errorMessages = data.errors.map((e: { message?: string }) => e.message).filter(Boolean);
+        if (errorMessages.length > 0) {
+          message = errorMessages.join('. ');
+        }
+      }
+      
       throw new ApiError(response.status, message);
     }
 

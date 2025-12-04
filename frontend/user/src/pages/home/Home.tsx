@@ -1,9 +1,15 @@
 import { useEffect, useState, useCallback } from 'react';
-import { productService, type ProductData, type GetAllProductsParams } from '../../services/products.ts';
+import { productService, type ProductData, type GetAllProductsParams, type ProductSellerInfo } from '../../services/products.ts';
 import Listing from '../../components/listing/Listing.tsx';
 import type { ListingData } from '../../types';
 import Button from '../../components/button/Button.tsx';
 import Sidebar from '../../components/sidebar/Sidebar.tsx';
+
+// Helper to extract seller ID from ProductData
+function getSellerId(sellerId: ProductSellerInfo | string): string {
+  if (typeof sellerId === 'string') return sellerId;
+  return sellerId._id;
+}
 
 export default function Home() {
   const [products, setProducts] = useState<ProductData[]>([]);
@@ -50,12 +56,12 @@ export default function Home() {
 
 
   return (
-    <div className="flex bg-gray-50 min-h-screen">
+    <div className="flex bg-gray-50 h-screen overflow-hidden">
       {/* Sidebar */}
       <Sidebar search={search} onSearchChange={setSearch} />
 
       {/* Main Content Area */}
-      <div className="flex-1 p-8 overflow-y-auto">
+      <div className="flex-1 p-25 overflow-y-auto">
         {loading && products.length === 0 ? (
           <div className="text-center py-8">Loading products...</div>
         ) : error ? (
@@ -67,16 +73,16 @@ export default function Home() {
             {products.map((product) => (
               <Listing key={product._id} data={{
                 listingId: product._id,
-                userId: "temp_user_id", // Placeholder as ProductData doesn't have userId directly
+                userId: getSellerId(product.sellerId),
                 description: product.description,
-                timeCreated: new Date(), // Placeholder
+                timeCreated: new Date(product.createdAt),
                 condition: product.condition,
                 photos: product.images,
                 location: product.location,
                 price: product.price,
-                sold: false, // Placeholder
-                quantity: 1, // Placeholder
-                category: [product.category], // ProductData.category is a string, ListingData.category is string[]
+                sold: product.status === 'sold',
+                quantity: 1,
+                category: [product.category],
               } as ListingData} />
             ))}
           </div>

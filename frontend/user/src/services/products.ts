@@ -19,6 +19,17 @@ export interface CreateProductResponse {
   };
 }
 
+export interface ProductSellerInfo {
+  _id: string;
+  userName?: string;
+  firstName?: string;
+  lastName?: string;
+  profilePicture?: string;
+  avatar?: string;
+  university?: string;
+  schoolName?: string;
+}
+
 export interface ProductData {
   _id: string;
   title: string;
@@ -31,6 +42,10 @@ export interface ProductData {
   longitude?: number | null;
   images: string[];
   tags?: string[];
+  sellerId: ProductSellerInfo | string;
+  status: 'available' | 'sold' | 'pending';
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface GetProductByIdResponse {

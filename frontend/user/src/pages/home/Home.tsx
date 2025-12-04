@@ -17,7 +17,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState(''); 
   const [category, setCategory] = useState('');
-  const [condition, setCondition] = useState<'new' | 'like-new' | 'good' | 'fair' | 'poor' | ''>('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCondition, setSelectedCondition] = useState<'new' | 'like-new' | 'good' | 'fair' | 'poor' | ''>('');
   const [minPrice, setMinPrice] = useState<number | ''>('');
   const [maxPrice, setMaxPrice] = useState<number | ''>('');
   const [page, setPage] = useState(1);
@@ -27,12 +28,15 @@ export default function Home() {
   const fetchProducts = useCallback(async (params: GetAllProductsParams, append: boolean = false) => {
     setLoading(true);
     setError(null);
+    console.log('Fetching products with params:', params); // Add this line
     try {
       const response = await productService.getAll(params);
       setProducts((prevProducts) => (append ? [...prevProducts, ...response.data.products] : response.data.products));
       setHasMore(response.data.products.length === limit);
-    } catch (err) {
-      setError('Failed to fetch products. Please try again later.');
+      console.log('Products fetched successfully:', response.data.products); // Add this line
+    } catch (err: any) { // Explicitly type err as any to access message
+      const errorMessage = err.message || 'Failed to fetch products. Please try again later.';
+      setError(errorMessage);
       console.error('Error fetching products:', err);
     } finally {
       setLoading(false);
@@ -41,24 +45,49 @@ export default function Home() {
 
   useEffect(() => {
     setPage(1); // Reset to first page on filter/search change
-    fetchProducts({ search, category, condition: condition || undefined, minPrice: Number(minPrice) || undefined, maxPrice: Number(maxPrice) || undefined, page: 1, limit }, false);
-  }, [search, category, condition, minPrice, maxPrice, limit, fetchProducts]);
-
-  const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1);
-  };
-
-  useEffect(() => {
-    if (page > 1) {
-      fetchProducts({ search, category, condition: condition || undefined, minPrice: Number(minPrice) || undefined, maxPrice: Number(maxPrice) || undefined, page, limit }, true);
-    }
-  }, [page, search, category, condition, minPrice, maxPrice, limit, fetchProducts]);
+    fetchProducts({
+      search,
+      category: selectedCategory || category,
+      condition: selectedCondition || undefined,
+      minPrice: minPrice === '' ? undefined : Number(minPrice),
+      maxPrice: maxPrice === '' ? undefined : Number(maxPrice),
+      page: 1,
+      limit
+    }, false);
+  }, [search, category, selectedCategory, selectedCondition, minPrice, maxPrice, limit, fetchProducts]);
+ 
+   const handleLoadMore = () => {
+     setPage((prevPage) => prevPage + 1);
+   };
+ 
+   useEffect(() => {
+     if (page > 1) {
+       fetchProducts({
+         search,
+         category: selectedCategory || category,
+         condition: selectedCondition || undefined,
+         minPrice: minPrice === '' ? undefined : Number(minPrice),
+         maxPrice: maxPrice === '' ? undefined : Number(maxPrice),
+         page,
+         limit
+       }, true);
+     }
+   }, [page, search, category, selectedCategory, selectedCondition, minPrice, maxPrice, limit, fetchProducts]);
 
 
   return (
     <div className="flex bg-gray-50 h-screen overflow-hidden">
       {/* Sidebar */}
-      <Sidebar search={search} onSearchChange={setSearch} />
+      <Sidebar
+        search={search}
+        onSearchChange={setSearch}
+        onCategorySelect={setSelectedCategory}
+        onConditionSelect={setSelectedCondition}
+        minPrice={minPrice === '' ? '' : String(minPrice)}
+        maxPrice={maxPrice === '' ? '' : String(maxPrice)}
+        onMinPriceChange={(value) => setMinPrice(value === '' ? '' : Number(value))}
+        onMaxPriceChange={(value) => setMaxPrice(value === '' ? '' : Number(value))}
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 p-25 overflow-y-auto">

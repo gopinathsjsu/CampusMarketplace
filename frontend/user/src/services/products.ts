@@ -107,7 +107,55 @@ async function getById(id: string): Promise<GetProductByIdResponse> {
 export const productService = {
   create,
   getById,
+  getAll,
 };
+
+export interface GetAllProductsResponse {
+  success: boolean;
+  data: {
+    products: ProductData[];
+    total: number;
+    page: number;
+    limit: number;
+  };
+}
+
+export interface GetAllProductsParams {
+  search?: string;
+  category?: string;
+  condition?: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  limit?: number;
+}
+
+async function getAll(params: GetAllProductsParams = {}): Promise<GetAllProductsResponse> {
+  const query = new URLSearchParams();
+  if (params.search) query.append('search', params.search);
+  if (params.category) query.append('category', params.category);
+  if (params.condition) query.append('condition', params.condition);
+  if (params.minPrice) query.append('minPrice', String(params.minPrice));
+  if (params.maxPrice) query.append('maxPrice', String(params.maxPrice));
+  if (params.page) query.append('page', String(params.page));
+  if (params.limit) query.append('limit', String(params.limit));
+
+  const url = `${API.products.list}?${query.toString()}`;
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      ...authHeader(),
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = (data && (data.message || data.detail)) || 'Failed to load products';
+    throw new ProductApiError(res.status, message);
+  }
+  return data as GetAllProductsResponse;
+}
 
 export { ProductApiError };
 

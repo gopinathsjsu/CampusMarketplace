@@ -11,7 +11,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const hasStoredUser = typeof window !== 'undefined' && !!localStorage.getItem('user');
 
   if (!user && !hasStoredUser) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/sign-in" replace />;
   }
 
   return <>{children}</>;

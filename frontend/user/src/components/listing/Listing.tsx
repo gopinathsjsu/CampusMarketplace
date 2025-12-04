@@ -58,14 +58,13 @@ export default function Listing({ data }: ListingProps) {
 
   return (
     <div
-      className="bg-white cursor-pointer"
-      style={{ width: '455px', height: '320px' }}
+      className="bg-white cursor-pointer w-full min-h-80 rounded-2xl shadow-md flex flex-col"
       onClick={() => setIsDetailsOpen(true)}
       role="button"
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
-      <div className="relative z-10" style={{ height: '232px' }}>
+      <div className="relative z-10 h-48">
         <img
           src={data.photos[0]}
           alt={data.description}
@@ -73,11 +72,11 @@ export default function Listing({ data }: ListingProps) {
         />
       </div>
 
-      <div className="bg-gray-100 px-4 py-4 rounded-b-2xl -translate-y-2">
-        <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-gray-900">${data.price.toFixed(2)}</div>
+      <div className="bg-gray-100 px-4 py-4 rounded-b-2xl flex-1 flex flex-col justify-between">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xl font-bold text-gray-900">${data.price.toFixed(2)}</div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 md:hidden lg:flex">
             {loading ? (
               <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
             ) : (
@@ -95,7 +94,7 @@ export default function Listing({ data }: ListingProps) {
                   userData?.displayName || 'Unknown User'
                 )}
               </div>
-              <div className="text-sm text-gray-600">{data.location}</div>
+              <div className="text-sm text-gray-600 md:hidden lg:block">{data.location}</div>
             </div>
           </div>
         </div>

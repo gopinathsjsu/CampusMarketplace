@@ -5,6 +5,8 @@ import Input from '../input';
 import { uploadFile, FileUploadError } from '../../services/file.ts';
 import MapPicker from '../map/MapPicker.tsx';
 import { productService, ProductApiError, type ProductData } from '../../services/products.ts';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 interface EditListingModalProps {
   isOpen: boolean;
@@ -242,7 +244,7 @@ export default function EditListingModal({ isOpen, onClose, listingId, onUpdated
             ) : imageUrl ? (
               <img src={imageUrl} alt="Uploaded preview" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-6xl text-gray-400">+</span>
+              <FontAwesomeIcon icon={faPlus} className="text-6xl text-gray-400" />
             )}
           </div>
           {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
@@ -274,17 +276,23 @@ export default function EditListingModal({ isOpen, onClose, listingId, onUpdated
         {/* Categories */}
         <div className="mb-4">
           <label className="block text-lg font-semibold mb-2 text-left">Categories</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-6 py-3 text-base rounded-full border-2 border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-6 py-3 text-base rounded-full border-2 border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 appearance-none cursor-pointer"
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+            <FontAwesomeIcon
+              icon={faChevronDown}
+              className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            />
+          </div>
         </div>
 
         {/* Condition */}

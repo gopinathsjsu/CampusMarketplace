@@ -18,6 +18,10 @@ interface SidebarProps {
   onSearchChange: (value: string) => void;
   onCategorySelect: (category: string) => void;
   onConditionSelect: (condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor' | '') => void;
+  minPrice: string;
+  maxPrice: string;
+  onMinPriceChange: (value: string) => void;
+  onMaxPriceChange: (value: string) => void;
 }
 
 const categoryMap: { [key: string]: string } = {
@@ -31,7 +35,7 @@ const categoryMap: { [key: string]: string } = {
   'Other': 'other', // Explicitly mapping 'Other' to 'other' backend enum
 };
 
-export default function Sidebar({ search, onSearchChange, onCategorySelect, onConditionSelect }: SidebarProps) {
+export default function Sidebar({ search, onSearchChange, onCategorySelect, onConditionSelect, minPrice, maxPrice, onMinPriceChange, onMaxPriceChange }: SidebarProps) {
   const handleCategoryClick = (displayName: string) => {
     const backendCategory = categoryMap[displayName];
     if (backendCategory) {
@@ -41,6 +45,22 @@ export default function Sidebar({ search, onSearchChange, onCategorySelect, onCo
       // it means it should default to 'other' or a cleared state.
       // For now, clearing is appropriate.
       onCategorySelect('');
+    }
+  };
+
+  const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty string or valid numbers
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      onMinPriceChange(value);
+    }
+  };
+
+  const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty string or valid numbers
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      onMaxPriceChange(value);
     }
   };
 
@@ -87,6 +107,35 @@ export default function Sidebar({ search, onSearchChange, onCategorySelect, onCo
  
        {/* Divider */}
        <hr className="border-gray-200" />
+
+      {/* Price Filter */}
+      <div className="text-left">
+        <h3 className="text-lg font-bold text-gray-800 mb-3">Price</h3>
+        <div className="flex items-center space-x-3">
+          <Input
+            type="number"
+            placeholder="Min"
+            rounded
+            value={minPrice}
+            onChange={handleMinPriceChange}
+            size={'md'}
+            className="w-1/2"
+          />
+          <span className="text-gray-500">-</span>
+          <Input
+            type="number"
+            placeholder="Max"
+            rounded
+            value={maxPrice}
+            onChange={handleMaxPriceChange}
+            size={'md'}
+            className="w-1/2"
+          />
+        </div>
+      </div>
+
+      {/* Divider */}
+      <hr className="border-gray-200" />
 
       {/* Condition Filter */}
       <div className="text-left">

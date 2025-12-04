@@ -45,24 +45,49 @@ export default function Home() {
 
   useEffect(() => {
     setPage(1); // Reset to first page on filter/search change
-    fetchProducts({ search, category: selectedCategory || category, condition: selectedCondition || undefined, minPrice: Number(minPrice) || undefined, maxPrice: Number(maxPrice) || undefined, page: 1, limit }, false);
+    fetchProducts({
+      search,
+      category: selectedCategory || category,
+      condition: selectedCondition || undefined,
+      minPrice: minPrice === '' ? undefined : Number(minPrice),
+      maxPrice: maxPrice === '' ? undefined : Number(maxPrice),
+      page: 1,
+      limit
+    }, false);
   }, [search, category, selectedCategory, selectedCondition, minPrice, maxPrice, limit, fetchProducts]);
-
-  const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1);
-  };
-
-  useEffect(() => {
-    if (page > 1) {
-      fetchProducts({ search, category, condition: selectedCondition || undefined, minPrice: Number(minPrice) || undefined, maxPrice: Number(maxPrice) || undefined, page, limit }, true);
-    }
-  }, [page, search, category, selectedCategory, selectedCondition, minPrice, maxPrice, limit, fetchProducts]);
+ 
+   const handleLoadMore = () => {
+     setPage((prevPage) => prevPage + 1);
+   };
+ 
+   useEffect(() => {
+     if (page > 1) {
+       fetchProducts({
+         search,
+         category: selectedCategory || category,
+         condition: selectedCondition || undefined,
+         minPrice: minPrice === '' ? undefined : Number(minPrice),
+         maxPrice: maxPrice === '' ? undefined : Number(maxPrice),
+         page,
+         limit
+       }, true);
+     }
+   }, [page, search, category, selectedCategory, selectedCondition, minPrice, maxPrice, limit, fetchProducts]);
 
 
   return (
     <div className="flex bg-gray-50 h-screen overflow-hidden">
       {/* Sidebar */}
-      <Sidebar search={search} onSearchChange={setSearch} onCategorySelect={setSelectedCategory} onConditionSelect={setSelectedCondition} />
+      <Sidebar
+        search={search}
+        onSearchChange={setSearch}
+        onCategorySelect={setSelectedCategory}
+        onConditionSelect={setSelectedCondition}
+        minPrice={minPrice === '' ? '' : String(minPrice)}
+        maxPrice={maxPrice === '' ? '' : String(maxPrice)}
+        onMinPriceChange={(value) => setMinPrice(value === '' ? '' : Number(value))}
+        onMaxPriceChange={(value) => setMaxPrice(value === '' ? '' : Number(value))}
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 p-25 overflow-y-auto">

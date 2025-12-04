@@ -19,7 +19,7 @@ interface SidebarProps {
 
 export default function Sidebar({ search, onSearchChange }: SidebarProps) {
   return (
-    <div className="w-100 bg-white shadow-lg p-10 space-y-6">
+    <div className="w-90 bg-white p-10 space-y-6">
       {/* Search Bar */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

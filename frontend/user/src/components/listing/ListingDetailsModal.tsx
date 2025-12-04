@@ -65,7 +65,7 @@ export default function ListingDetailsModal({
           <div className="text-red-600 text-center mb-4">{error}</div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_22vw] gap-y-6 md:gap-x-10 items-start">
+        <div className="grid md:grid-cols-2 gap-6 items-start">
           {/* Left column: image + description */}
           <div className="flex flex-col gap-4">
             <div className="rounded-3xl overflow-hidden bg-gray-100">
@@ -92,7 +92,7 @@ export default function ListingDetailsModal({
 
           {/* Right column: smaller, non-interactive map + price and tags */}
           <div className="flex flex-col gap-4">
-            <div className="rounded-3xl overflow-hidden bg-gray-100 h-[220px] w-full">
+            <div className="rounded-3xl overflow-hidden bg-gray-100 h-[220px] w-0=[300px]">
               {coords ? (
                 <MapPicker className="w-full h-full pointer-events-none" value={coords} />
               ) : (

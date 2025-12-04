@@ -62,7 +62,9 @@ app.use(cors({
     }
     return callback(new Error(`CORS: Origin ${origin} not allowed`));
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 // Lightweight request logger for debugging (toggle with DEBUG_REQUESTS=1)
 app.use((req, _res, next) => {
@@ -73,7 +75,7 @@ app.use((req, _res, next) => {
 });
 app.use(compression());
 app.use(morgan('combined'));
-app.use(limiter);
+// app.use(limiter); // Temporarily disable rate limiting for debugging
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

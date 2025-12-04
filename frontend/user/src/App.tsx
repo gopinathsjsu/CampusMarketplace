@@ -13,14 +13,7 @@ function App() {
       <div className="App">
         <Header />
         <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          /> {/* Route Home component to the root path */}
+          <Route path="/" element={<Home />} /> {/* Route Home component to the root path */}
           <Route
             path="/profile"
             element={

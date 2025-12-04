@@ -1,13 +1,14 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faChevronRight, 
+import {
+  faChevronRight,
   faMagnifyingGlass,
-  faCar,
-  faBuilding,
   faShirt,
-  faTag,
   faLaptop,
-  faFilm
+  faBook, // Icon for Textbooks
+  faCouch, // Icon for Furniture
+  faBaseballBall, // Icon for Sports
+  faPencilAlt, // Icon for Supplies
+  faEllipsisH // Icon for Other
 } from '@fortawesome/free-solid-svg-icons';
 import Input from '../input/Input.tsx';
 import Button from '../button/Button.tsx';
@@ -15,9 +16,33 @@ import Button from '../button/Button.tsx';
 interface SidebarProps {
   search: string;
   onSearchChange: (value: string) => void;
+  onCategorySelect: (category: string) => void;
 }
 
-export default function Sidebar({ search, onSearchChange }: SidebarProps) {
+const categoryMap: { [key: string]: string } = {
+  // Frontend Display Name -> Backend Enum Value (from backend/server/src/models/Product.ts)
+  'Apparel': 'clothing',
+  'Electronics': 'electronics',
+  'Textbooks': 'textbooks',
+  'Furniture': 'furniture',
+  'Sports': 'sports',
+  'Supplies': 'supplies',
+  'Other': 'other', // Explicitly mapping 'Other' to 'other' backend enum
+};
+
+export default function Sidebar({ search, onSearchChange, onCategorySelect }: SidebarProps) {
+  const handleCategoryClick = (displayName: string) => {
+    const backendCategory = categoryMap[displayName];
+    if (backendCategory) {
+      onCategorySelect(backendCategory);
+    } else {
+      // If a display name doesn't have a direct backend mapping,
+      // it means it should default to 'other' or a cleared state.
+      // For now, clearing is appropriate.
+      onCategorySelect('');
+    }
+  };
+
   return (
     <div className="w-100 bg-white shadow-lg p-10 space-y-6">
       {/* Search Bar */}
@@ -66,31 +91,45 @@ export default function Sidebar({ search, onSearchChange }: SidebarProps) {
       <div className="text-left">
         <h3 className="text-lg font-bold text-gray-800 mb-3">Categories</h3>
         <ul className="space-y-3">
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600">
-            <FontAwesomeIcon icon={faCar} className="w-5 h-5" />
-            <span>Vehicles</span>
-          </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600">
-            <FontAwesomeIcon icon={faBuilding} className="w-5 h-5" />
-            <span>Property Rentals</span>
-          </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600">
+          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Apparel')}>
             <FontAwesomeIcon icon={faShirt} className="w-5 h-5" />
             <span>Apparel</span>
           </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600">
-            <FontAwesomeIcon icon={faTag} className="w-5 h-5" />
-            <span>Classifieds</span>
-          </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600">
+          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Electronics')}>
             <FontAwesomeIcon icon={faLaptop} className="w-5 h-5" />
             <span>Electronics</span>
           </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600">
-            <FontAwesomeIcon icon={faFilm} className="w-5 h-5" />
-            <span>Entertainment</span>
+          {/* New categories matching backend enums with appropriate icons */}
+          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Textbooks')}>
+            <FontAwesomeIcon icon={faBook} className="w-5 h-5" />
+            <span>Textbooks</span>
+          </li>
+          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Furniture')}>
+            <FontAwesomeIcon icon={faCouch} className="w-5 h-5" />
+            <span>Furniture</span>
+          </li>
+          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Sports')}>
+            <FontAwesomeIcon icon={faBaseballBall} className="w-5 h-5" />
+            <span>Sports</span>
+          </li>
+          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Supplies')}>
+            <FontAwesomeIcon icon={faPencilAlt} className="w-5 h-5" />
+            <span>Supplies</span>
+          </li>
+          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Other')}>
+            <FontAwesomeIcon icon={faEllipsisH} className="w-5 h-5" />
+            <span>Other</span>
           </li>
         </ul>
+        <div className="px-4 mt-6">
+          <Button
+            text="Clear Category Filter"
+            rounded
+            fullWidth
+            size="md"
+            onClick={() => onCategorySelect('')}
+          />
+        </div>
       </div>
     </div>
   );

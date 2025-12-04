@@ -41,6 +41,7 @@ router.get('/', [
   query('minPrice').optional().isFloat({ min: 0 }).withMessage('Min price must be positive'),
   query('maxPrice').optional().isFloat({ min: 0 }).withMessage('Max price must be positive'),
   query('search').optional().isString().trim(),
+  query('location').optional().isString().trim(), // Add location query parameter validation
   query('sortBy').optional().isIn(['price', 'createdAt', 'views']),
   query('sortOrder').optional().isIn(['asc', 'desc'])
 ], validateRequest, optionalAuth, asyncHandler(async (req: AuthRequest, res: express.Response) => {
@@ -52,6 +53,7 @@ router.get('/', [
     minPrice,
     maxPrice,
     search,
+    location, // Extract location from query
     sortBy = 'createdAt',
     sortOrder = 'desc'
   } = req.query;
@@ -68,8 +70,11 @@ router.get('/', [
     if (maxPrice) filter.price.$lte = parseFloat(maxPrice as string);
   }
 
-  if (search) {
-    filter.$text = { $search: search as string };
+  if (search || location) {
+    const searchTerms = [search, location].filter(Boolean).map(term => term as string).join(' ');
+    if (searchTerms) {
+      filter.$text = { $search: searchTerms };
+    }
   }
 
   // Build sort object

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/header/Header.tsx';
 import SignIn from './pages/signIn/SignIn.tsx';
@@ -13,7 +13,14 @@ function App() {
       <div className="App">
         <Header />
         <Routes>
-          <Route path="/" element={<Home />} /> {/* Route Home component to the root path */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/profile"
             element={
@@ -24,6 +31,7 @@ function App() {
           />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
+          <Route path="*" element={<Navigate to="/sign-in" replace />} />
         </Routes>
       </div>
     </Router>

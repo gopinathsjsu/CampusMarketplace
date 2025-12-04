@@ -19,12 +19,21 @@ interface SidebarProps {
   sellingMode: boolean;
   onSellingToggle: () => void;
   onCategorySelect: (category: string) => void;
+  selectedCondition: 'new' | 'like-new' | 'good' | 'fair' | 'poor' | '';
   onConditionSelect: (condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor' | '') => void;
   minPrice: string;
   maxPrice: string;
   onMinPriceChange: (value: string) => void;
   onMaxPriceChange: (value: string) => void;
 }
+
+const conditions: { value: 'new' | 'like-new' | 'good' | 'fair' | 'poor'; label: string }[] = [
+  { value: 'new', label: 'New' },
+  { value: 'like-new', label: 'Like-new' },
+  { value: 'good', label: 'Good' },
+  { value: 'fair', label: 'Fair' },
+  { value: 'poor', label: 'Poor' },
+];
 
 const categoryMap: { [key: string]: string } = {
   // Frontend Display Name -> Backend Enum Value (from backend/server/src/models/Product.ts)
@@ -37,7 +46,7 @@ const categoryMap: { [key: string]: string } = {
   'Other': 'other', // Explicitly mapping 'Other' to 'other' backend enum
 };
 
-export default function Sidebar({ search, onSearchChange, sellingMode, onSellingToggle, onCategorySelect, onConditionSelect, minPrice, maxPrice, onMinPriceChange, onMaxPriceChange }: SidebarProps) {
+export default function Sidebar({ search, onSearchChange, sellingMode, onSellingToggle, onCategorySelect, selectedCondition, onConditionSelect, minPrice, maxPrice, onMinPriceChange, onMaxPriceChange }: SidebarProps) {
   const handleCategoryClick = (displayName: string) => {
     const backendCategory = categoryMap[displayName];
     if (backendCategory) {
@@ -144,17 +153,22 @@ export default function Sidebar({ search, onSearchChange, sellingMode, onSelling
       {/* Condition Filter */}
       <div className="text-left">
         <h3 className="text-lg font-bold text-gray-800 mb-3">Condition</h3>
-        <ul className="space-y-3">
-          {['new', 'like-new', 'good', 'fair', 'poor'].map((conditionOption) => (
-            <li
-              key={conditionOption}
-              className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600"
-              onClick={() => onConditionSelect(conditionOption as 'new' | 'like-new' | 'good' | 'fair' | 'poor')}
+        <div className="flex flex-wrap gap-2">
+          {conditions.map((c) => (
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => onConditionSelect(selectedCondition === c.value ? '' : c.value)}
+              className={`px-4 py-2 rounded-full border-2 transition-colors ${
+                selectedCondition === c.value
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+              }`}
             >
-              <span>{conditionOption.charAt(0).toUpperCase() + conditionOption.slice(1)}</span>
-            </li>
+              {c.label}
+            </button>
           ))}
-        </ul>
+        </div>
         <div className="px-4 mt-6">
           <Button
             text="Clear Condition Filter"

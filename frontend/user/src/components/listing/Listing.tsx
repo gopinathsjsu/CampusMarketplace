@@ -58,30 +58,30 @@ export default function Listing({ data }: ListingProps) {
 
   return (
     <div
-      className="bg-white cursor-pointer w-full min-h-80 rounded-2xl shadow-md flex flex-col"
+      className="cursor-pointer w-[30vw] h-[35vh] mb-10"
       onClick={() => setIsDetailsOpen(true)}
       role="button"
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
-      <div className="relative z-10 h-48">
+      <div className="relative z-10 h-[28vh]">
         <img
           src={data.photos[0]}
           alt={data.description}
-          className="w-full h-full object-cover rounded-2xl"
+          className="w-full h-full object-cover rounded-3xl"
         />
       </div>
 
-      <div className="bg-gray-100 px-4 py-4 rounded-b-2xl flex-1 flex flex-col justify-between">
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-xl font-bold text-gray-900">${data.price.toFixed(2)}</div>
+      <div className="bg-gray-100 px-8 pt-8 pb-4 rounded-b-3xl -translate-y-4">
+        <div className="flex items-center justify-between">
+          <div className="text-3xl font-bold text-gray-900">${data.price.toFixed(2)}</div>
 
-          <div className="flex items-center space-x-3 md:hidden lg:flex">
+          <div className="flex items-center space-x-3">
             {loading ? (
               <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
             ) : (
               <img
-                src={userData?.profilePicture || 'https://via.placeholder.com/40'}
+                src={userData?.profilePicture}
                 alt={userData?.displayName || 'User'}
                 className="w-10 h-10 rounded-full object-cover shadow-sm"
               />
@@ -94,7 +94,7 @@ export default function Listing({ data }: ListingProps) {
                   userData?.displayName || 'Unknown User'
                 )}
               </div>
-              <div className="text-sm text-gray-600 md:hidden lg:block">{data.location}</div>
+              <div className="text-sm text-gray-600">{data.location}</div>
             </div>
           </div>
         </div>

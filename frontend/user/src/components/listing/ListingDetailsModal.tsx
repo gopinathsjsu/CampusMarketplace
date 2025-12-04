@@ -57,7 +57,7 @@ export default function ListingDetailsModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} mask={true} backgroundColor="#EFF1F5" width="60vw">
       <div className="w-full">
-        <h2 className="text-4xl font-extrabold text-gray-900 text-center mb-6">
+        <h2 className="text-2xl font-extrabold text-gray-900 text-center mb-6">
           {title}
         </h2>
 
@@ -70,9 +70,9 @@ export default function ListingDetailsModal({
           <div className="flex flex-col gap-4">
             <div className="rounded-3xl overflow-hidden bg-gray-100">
               {image ? (
-                <img src={image} alt={title} className="w-full h-[320px] object-cover" />
+                <img src={image} alt={title} className="w-full h-[34vh] object-cover" />
               ) : (
-                <div className="w-full h-[320px] bg-gray-200 flex items-center justify-center text-gray-500">
+                <div className="w-full h-[34vh] bg-gray-200 flex items-center justify-center text-gray-500">
                   No image
                 </div>
               )}
@@ -103,7 +103,7 @@ export default function ListingDetailsModal({
             </div>
             <div>
               <div className="text-4xl font-extrabold text-gray-900 mb-3 text-left">
-                ${price.toFixed(2)}
+                ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="flex flex-wrap gap-2">
                 {tags.map((t) => (

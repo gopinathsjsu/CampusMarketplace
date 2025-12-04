@@ -41,6 +41,7 @@ router.get('/', [
   query('minPrice').optional().isFloat({ min: 0 }).withMessage('Min price must be positive'),
   query('maxPrice').optional().isFloat({ min: 0 }).withMessage('Max price must be positive'),
   query('search').optional().isString().trim(),
+  query('status').optional().isIn(['available', 'sold', 'pending']).withMessage('Invalid status'),
   query('sortBy').optional().isIn(['price', 'createdAt', 'views']),
   query('sortOrder').optional().isIn(['asc', 'desc'])
 ], validateRequest, optionalAuth, asyncHandler(async (req: AuthRequest, res: express.Response) => {
@@ -52,12 +53,17 @@ router.get('/', [
     minPrice,
     maxPrice,
     search,
+    status = 'available',
     sortBy = 'createdAt',
     sortOrder = 'desc'
   } = req.query;
 
   // Build filter object
-  const filter: any = { status: 'available' };
+  const filter: any = {};
+
+  if (status) {
+    filter.status = status;
+  }
 
   if (category) filter.category = category;
   if (condition) filter.condition = condition;

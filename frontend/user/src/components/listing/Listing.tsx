@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import type { UserData, ListingData } from '../../types';
 import { API } from '../../routes/api.ts';
 import ListingDetailsModal from './ListingDetailsModal';
+import EditListingModal from './EditListingModal';
+import { useUser } from '../../context/userDTO';
 
 export interface ListingProps {
   data: ListingData;
@@ -30,9 +32,14 @@ async function getUser(userId: string): Promise<UserData | null> {
 }
 
 export default function Listing({ data }: ListingProps) {
+  const { user } = useUser();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  // Check if the current user owns this listing
+  const isOwnListing = user && user._id === data.userId;
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -49,17 +56,25 @@ export default function Listing({ data }: ListingProps) {
     fetchUser();
   }, [data.userId]);
 
+  const handleOpenModal = () => {
+    if (isOwnListing) {
+      setIsEditOpen(true);
+    } else {
+      setIsDetailsOpen(true);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      setIsDetailsOpen(true);
+      handleOpenModal();
     }
   };
 
   return (
     <div
       className="cursor-pointer w-[30vw] h-[35vh] mb-10"
-      onClick={() => setIsDetailsOpen(true)}
+      onClick={handleOpenModal}
       role="button"
       tabIndex={0}
       onKeyDown={handleKeyDown}
@@ -99,11 +114,20 @@ export default function Listing({ data }: ListingProps) {
           </div>
         </div>
       </div>
-      <ListingDetailsModal
-        isOpen={isDetailsOpen}
-        onClose={() => setIsDetailsOpen(false)}
-        listingId={data.listingId}
-      />
+      {isOwnListing ? (
+        <EditListingModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          listingId={data.listingId}
+          onUpdated={() => window.location.reload()}
+        />
+      ) : (
+        <ListingDetailsModal
+          isOpen={isDetailsOpen}
+          onClose={() => setIsDetailsOpen(false)}
+          listingId={data.listingId}
+        />
+      )}
     </div>
   );
 }

@@ -37,8 +37,11 @@ export default function SignIn() {
       const res = await authService.signIn({ identifier, password });
       const { user, token } = res.data;
 
-      // Persist token for subsequent authenticated requests
-      try { localStorage.setItem('authToken', token); } catch {}
+      // Persist token and user ID for subsequent authenticated requests
+      try { 
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('userId', user._id);
+      } catch {}
 
       setUser(user);
       navigate('/');

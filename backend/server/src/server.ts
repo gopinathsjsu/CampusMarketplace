@@ -41,7 +41,7 @@ const PORT = process.env.PORT || 5000;
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 1000 requests per windowMs
   message: 'Too many requests from this IP, please try again later.'
 });
 
@@ -62,7 +62,9 @@ app.use(cors({
     }
     return callback(new Error(`CORS: Origin ${origin} not allowed`));
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 // Lightweight request logger for debugging (toggle with DEBUG_REQUESTS=1)
 app.use((req, _res, next) => {
@@ -73,9 +75,9 @@ app.use((req, _res, next) => {
 });
 app.use(compression());
 app.use(morgan('combined'));
-app.use(limiter);
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ extended: true, limit: '100mb' }));
+// app.use(limiter); // Temporarily disable rate limiting for debugging
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Additional verbose logging including request body (post-parsing)
 morgan.token('body', (req) => {

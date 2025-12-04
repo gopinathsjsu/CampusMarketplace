@@ -143,11 +143,107 @@ async function purchase(id: string): Promise<PurchaseProductResponse> {
   return data as PurchaseProductResponse;
 }
 
+async function getByUserId(userId: string): Promise<GetAllProductsResponse> {
+  const res = await fetch(API.users.productsByUser(userId), {
+    method: 'GET',
+    headers: {
+      ...authHeader(),
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = (data && (data.message || data.detail)) || 'Failed to load user products';
+    throw new ProductApiError(res.status, message);
+  }
+  return data as GetAllProductsResponse;
+}
+
+export interface UpdateProductPayload {
+  title?: string;
+  description?: string;
+  price?: number;
+  category?: string;
+  condition?: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
+  location?: string;
+  tags?: string[];
+  images?: File[];
+  existingImages?: string[];
+}
+
+export interface UpdateProductResponse {
+  success: true;
+  message: string;
+  data: {
+    product: ProductData;
+  };
+}
+
+async function update(id: string, payload: UpdateProductPayload): Promise<UpdateProductResponse> {
+  const form = new FormData();
+  if (payload.title !== undefined) form.append('title', payload.title);
+  if (payload.description !== undefined) form.append('description', payload.description);
+  if (payload.price !== undefined) form.append('price', String(payload.price));
+  if (payload.category !== undefined) form.append('category', payload.category);
+  if (payload.condition !== undefined) form.append('condition', payload.condition);
+  if (payload.location !== undefined) {
+    form.append('location', payload.location);
+    const match = payload.location.trim().match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if (match) {
+      form.append('latitude', match[1]);
+      form.append('longitude', match[2]);
+    }
+  }
+  if (payload.tags) {
+    payload.tags.forEach((t) => form.append('tags', t));
+  }
+  if (payload.images) {
+    payload.images.forEach((file) => form.append('images', file));
+  }
+  if (payload.existingImages) {
+    payload.existingImages.forEach((url) => form.append('existingImages', url));
+  }
+
+  const res = await fetch(API.products.update(id), {
+    method: 'PUT',
+    headers: {
+      ...authHeader(),
+    },
+    body: form,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = (data && (data.message || data.detail)) || 'Failed to update product';
+    throw new ProductApiError(res.status, message);
+  }
+  return data as UpdateProductResponse;
+}
+
+async function deleteProduct(id: string): Promise<{ success: boolean; message: string }> {
+  const res = await fetch(API.products.delete(id), {
+    method: 'DELETE',
+    headers: {
+      ...authHeader(),
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = (data && (data.message || data.detail)) || 'Failed to delete product';
+    throw new ProductApiError(res.status, message);
+  }
+  return data;
+}
+
 export const productService = {
   create,
   getById,
   getAll,
+  getByUserId,
   purchase,
+  update,
+  delete: deleteProduct,
 };
 
 export interface GetAllProductsResponse {

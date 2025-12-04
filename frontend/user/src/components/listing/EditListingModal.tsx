@@ -1,19 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../modal';
 import Button from '../button';
 import Input from '../input';
 import { uploadFile, FileUploadError } from '../../services/file.ts';
 import MapPicker from '../map/MapPicker.tsx';
-import { productService, ProductApiError } from '../../services/products.ts';
+import { productService, ProductApiError, type ProductData } from '../../services/products.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
-interface CreateListingModalProps {
+interface EditListingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  listingId: string;
+  onUpdated?: () => void;
 }
 
-export default function CreateListingModal({ isOpen, onClose }: CreateListingModalProps) {
+export default function EditListingModal({ isOpen, onClose, listingId, onUpdated }: EditListingModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [product, setProduct] = useState<ProductData | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -27,6 +31,8 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const categories = [
     'Vehicles',
@@ -45,6 +51,49 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
     { value: 'poor', label: 'Poor' },
   ];
 
+  // Map backend categories to UI categories
+  const backendToUiCategory: Record<string, string> = {
+    clothing: 'Apparel',
+    electronics: 'Electronics',
+    other: 'Classifieds',
+  };
+
+  // Load product data when modal opens
+  useEffect(() => {
+    if (!isOpen || !listingId) return;
+    let mounted = true;
+
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await productService.getById(listingId);
+        if (!mounted) return;
+        const p = res.data.product;
+        setProduct(p);
+        setTitle(p.title || '');
+        setDescription(p.description || '');
+        setPrice(String(p.price || 0));
+        setCategory(backendToUiCategory[p.category] || 'Classifieds');
+        setCondition(p.condition || 'good');
+        setTags(p.tags || []);
+        setImageUrl(p.images?.[0] || null);
+        if (p.latitude != null && p.longitude != null) {
+          setLocation({ lat: p.latitude, lng: p.longitude });
+        }
+      } catch (e: any) {
+        if (!mounted) return;
+        setError(e?.message || 'Failed to load listing');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isOpen, listingId]);
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -59,14 +108,13 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
         const message = err instanceof FileUploadError ? err.message : 'Failed to upload image';
         setError(message);
         setImage(null);
-        setImageUrl(null);
       } finally {
         setUploading(false);
       }
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const trimmedTitle = title.trim();
     if (trimmedTitle.length < 1 || trimmedTitle.length > 100) {
       setTitleError('Title is required and must be less than 100 characters');
@@ -74,53 +122,77 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
     }
     setTitleError(null);
 
-    // TODO: Implement actual submission logic
-    (async () => {
-      try {
-        if (!image) {
-          setError('Please upload at least one image');
-          return;
-        }
-        if (!location) {
-          setError('Location is required');
-          return;
-        }
-        setError(null);
-
-        // Map UI category to backend categories
-        const categoryMap: Record<string, string> = {
-          Apparel: 'clothing',
-          Electronics: 'electronics',
-          Vehicles: 'other',
-          'Property Rentals': 'other',
-          Classifieds: 'other',
-          Entertainment: 'other',
-        };
-        const mappedCategory = categoryMap[category] || 'other';
-
-        const locString = `${location.lat},${location.lng}`;
-        const numericPrice = parseFloat(price || '0');
-
-        await productService.create({
-          title: trimmedTitle,
-          description,
-          price: numericPrice,
-          category: mappedCategory,
-          condition,
-          location: locString,
-          tags,
-          images: [image],
-        });
-
-        onClose();
-      } catch (err) {
-        const message =
-          err instanceof ProductApiError
-            ? err.message
-            : 'Failed to create listing. Please try again.';
-        setError(message);
+    try {
+      if (!imageUrl) {
+        setError('Please upload at least one image');
+        return;
       }
-    })();
+      if (!location) {
+        setError('Location is required');
+        return;
+      }
+      setError(null);
+      setSaving(true);
+
+      // Map UI category to backend categories
+      const categoryMap: Record<string, string> = {
+        Apparel: 'clothing',
+        Electronics: 'electronics',
+        Vehicles: 'other',
+        'Property Rentals': 'other',
+        Classifieds: 'other',
+        Entertainment: 'other',
+      };
+      const mappedCategory = categoryMap[category] || 'other';
+
+      const locString = `${location.lat},${location.lng}`;
+      const numericPrice = parseFloat(price || '0');
+
+      await productService.update(listingId, {
+        title: trimmedTitle,
+        description,
+        price: numericPrice,
+        category: mappedCategory,
+        condition,
+        location: locString,
+        tags,
+        existingImages: [imageUrl],
+        images: image ? [image] : undefined,
+      });
+
+      onUpdated?.();
+      onClose();
+    } catch (err) {
+      const message =
+        err instanceof ProductApiError
+          ? err.message
+          : 'Failed to update listing. Please try again.';
+      setError(message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError(null);
+      await productService.delete(listingId);
+      onUpdated?.();
+      onClose();
+    } catch (err) {
+      const message =
+        err instanceof ProductApiError
+          ? err.message
+          : 'Failed to delete listing. Please try again.';
+      setError(message);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const addTag = () => {
@@ -145,17 +217,27 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
     setTags((prev) => prev.filter((x) => x !== t));
   };
 
+  if (loading) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} width={'32vw'}>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        </div>
+      </Modal>
+    );
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} width={'34vw'}>
       <div className="flex flex-col text-left">
-        <h2 className="text-3xl font-bold mb-6">Create Listing</h2>
+        <h2 className="text-3xl font-bold mb-6">Edit Listing</h2>
 
         {/* Image Upload */}
         <div className="mb-4">
           <label className="block text-lg font-semibold mb-2 text-left">Image</label>
           <div
             className="border-2 border-dashed border-gray-300 rounded-3xl h-[25vh] flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 overflow-hidden relative"
-            onClick={() => !uploading && document.getElementById('image-upload')?.click()}
+            onClick={() => !uploading && document.getElementById('edit-image-upload')?.click()}
           >
             {uploading ? (
               <span className="text-gray-500">Uploading...</span>
@@ -167,7 +249,7 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
           </div>
           {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           <input
-            id="image-upload"
+            id="edit-image-upload"
             type="file"
             accept="image/*"
             className="hidden"
@@ -308,15 +390,31 @@ export default function CreateListingModal({ isOpen, onClose }: CreateListingMod
         <div className="mb-6">
           <label className="block text-lg font-semibold mb-2 text-left">Location</label>
           <div className="border-2 border-gray-200 rounded-3xl h-48 bg-gray-100 overflow-hidden">
-            <MapPicker onChange={(coords) => setLocation(coords)} className="w-full h-full" />
+            <MapPicker onChange={(coords) => setLocation(coords)} value={location} className="w-full h-full" />
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* Action Buttons */}
+        <div className="flex justify-center mb-4">
+          <Button
+            text={saving ? 'Saving...' : 'Save Changes'}
+            size="lg"
+            rounded={true}
+            onClick={handleSubmit}
+            disabled={saving || deleting}
+          />
+        </div>
         <div className="flex justify-center">
-          <Button text="Submit" size="lg" rounded={true} onClick={handleSubmit} />
+          <Button
+            text={deleting ? 'Deleting...' : 'Delete'}
+            rounded={true}
+            color="#DC2626"
+            onClick={handleDelete}
+            disabled={deleting || saving}
+          />
         </div>
       </div>
     </Modal>
   );
 }
+

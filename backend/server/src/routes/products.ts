@@ -37,10 +37,12 @@ router.get('/', [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50'),
   query('category').optional().isIn(['textbooks', 'electronics', 'furniture', 'clothing', 'sports', 'supplies', 'other']),
-  query('condition').optional().isIn(['new', 'like-new', 'good', 'fair', 'poor']),
+  query('condition').optional().isIn(['new', 'like-new', 'good', 'fair', 'poor', '']),
   query('minPrice').optional().isFloat({ min: 0 }).withMessage('Min price must be positive'),
   query('maxPrice').optional().isFloat({ min: 0 }).withMessage('Max price must be positive'),
   query('search').optional().isString().trim(),
+  query('location').optional().isString().trim(),
+  query('status').optional().isIn(['available', 'sold', 'pending']).withMessage('Invalid status'),
   query('sortBy').optional().isIn(['price', 'createdAt', 'views']),
   query('sortOrder').optional().isIn(['asc', 'desc'])
 ], validateRequest, optionalAuth, asyncHandler(async (req: AuthRequest, res: express.Response) => {
@@ -52,12 +54,18 @@ router.get('/', [
     minPrice,
     maxPrice,
     search,
+    location,
+    status = 'available',
     sortBy = 'createdAt',
     sortOrder = 'desc'
   } = req.query;
 
   // Build filter object
-  const filter: any = { status: 'available' };
+  const filter: any = {};
+
+  if (status) {
+    filter.status = status;
+  }
 
   if (category) filter.category = category;
   if (condition) filter.condition = condition;
@@ -68,8 +76,11 @@ router.get('/', [
     if (maxPrice) filter.price.$lte = parseFloat(maxPrice as string);
   }
 
-  if (search) {
-    filter.$text = { $search: search as string };
+  if (search || location) {
+    const searchTerms = [search, location].filter(Boolean).map(term => term as string).join(' ');
+    if (searchTerms) {
+      filter.$text = { $search: searchTerms };
+    }
   }
 
   // Build sort object
@@ -379,6 +390,41 @@ router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: e
   res.json({
     success: true,
     message: 'Product deleted successfully'
+  });
+}));
+
+// @route   POST /api/products/:id/purchase
+// @desc    Purchase a product listing
+// @access  Private
+router.post('/:id/purchase', authenticate, asyncHandler(async (req: AuthRequest, res: express.Response) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    throw createError('Product not found', 404);
+  }
+
+  // Check if buyer is trying to buy their own product
+  if ((product as any).sellerId.toString() === req.user!._id.toString()) {
+    throw createError('Cannot purchase your own listing', 400);
+  }
+
+  // Check if product is available
+  if (product.status !== 'available') {
+    throw createError('Product is no longer available', 400);
+  }
+
+  // Update product with buyer info and mark as sold
+  product.buyerId = req.user!._id;
+  product.status = 'sold';
+  await product.save();
+
+  await product.populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName');
+  await product.populate('buyerId', 'userName profilePicture firstName lastName avatar university schoolName');
+
+  res.json({
+    success: true,
+    message: 'Product purchased successfully',
+    data: { product }
   });
 }));
 

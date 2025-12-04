@@ -9,7 +9,7 @@ import {
 } from 'react';
 
 export type UserDTO = {
-  _id?: string;
+  _id: string;
   userName: string;
   displayName: string;
   profilePicture: string;

@@ -17,6 +17,7 @@ interface SidebarProps {
   search: string;
   onSearchChange: (value: string) => void;
   onCategorySelect: (category: string) => void;
+  onConditionSelect: (condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor' | '') => void;
 }
 
 const categoryMap: { [key: string]: string } = {
@@ -30,7 +31,7 @@ const categoryMap: { [key: string]: string } = {
   'Other': 'other', // Explicitly mapping 'Other' to 'other' backend enum
 };
 
-export default function Sidebar({ search, onSearchChange, onCategorySelect }: SidebarProps) {
+export default function Sidebar({ search, onSearchChange, onCategorySelect, onConditionSelect }: SidebarProps) {
   const handleCategoryClick = (displayName: string) => {
     const backendCategory = categoryMap[displayName];
     if (backendCategory) {
@@ -44,7 +45,7 @@ export default function Sidebar({ search, onSearchChange, onCategorySelect }: Si
   };
 
   return (
-    <div className="w-100 bg-white shadow-lg p-10 space-y-6">
+    <div className="w-100 bg-white shadow-lg p-10 space-y-6 overflow-y-auto max-h-screen">
       {/* Search Bar */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -76,62 +77,90 @@ export default function Sidebar({ search, onSearchChange, onCategorySelect }: Si
       {/* Divider */}
       <hr className="border-gray-200" />
 
-      {/* Location Filter */}
+       {/* Location Filter */}
+       <div className="text-left">
+         <h3 className="text-lg font-bold text-gray-800 mb-2">Location</h3>
+         <div className="text-blue-600 font-medium cursor-pointer">
+           San Jose, California · Within 40 mi
+         </div>
+       </div>
+ 
+       {/* Divider */}
+       <hr className="border-gray-200" />
+
+      {/* Condition Filter */}
       <div className="text-left">
-        <h3 className="text-lg font-bold text-gray-800 mb-2">Location</h3>
-        <div className="text-blue-600 font-medium cursor-pointer">
-          San Jose, California · Within 40 mi
+        <h3 className="text-lg font-bold text-gray-800 mb-3">Condition</h3>
+        <ul className="space-y-3">
+          {['new', 'like-new', 'good', 'fair', 'poor'].map((conditionOption) => (
+            <li
+              key={conditionOption}
+              className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600"
+              onClick={() => onConditionSelect(conditionOption as 'new' | 'like-new' | 'good' | 'fair' | 'poor')}
+            >
+              <span>{conditionOption.charAt(0).toUpperCase() + conditionOption.slice(1)}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="px-4 mt-6">
+          <Button
+            text="Clear Condition Filter"
+            rounded
+            fullWidth
+            size="md"
+            onClick={() => onConditionSelect('')}
+          />
         </div>
       </div>
 
       {/* Divider */}
       <hr className="border-gray-200" />
-
-      {/* Categories */}
-      <div className="text-left">
-        <h3 className="text-lg font-bold text-gray-800 mb-3">Categories</h3>
-        <ul className="space-y-3">
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Apparel')}>
-            <FontAwesomeIcon icon={faShirt} className="w-5 h-5" />
-            <span>Apparel</span>
-          </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Electronics')}>
-            <FontAwesomeIcon icon={faLaptop} className="w-5 h-5" />
-            <span>Electronics</span>
-          </li>
-          {/* New categories matching backend enums with appropriate icons */}
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Textbooks')}>
-            <FontAwesomeIcon icon={faBook} className="w-5 h-5" />
-            <span>Textbooks</span>
-          </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Furniture')}>
-            <FontAwesomeIcon icon={faCouch} className="w-5 h-5" />
-            <span>Furniture</span>
-          </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Sports')}>
-            <FontAwesomeIcon icon={faBaseballBall} className="w-5 h-5" />
-            <span>Sports</span>
-          </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Supplies')}>
-            <FontAwesomeIcon icon={faPencilAlt} className="w-5 h-5" />
-            <span>Supplies</span>
-          </li>
-          <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Other')}>
-            <FontAwesomeIcon icon={faEllipsisH} className="w-5 h-5" />
-            <span>Other</span>
-          </li>
-        </ul>
-        <div className="px-4 mt-6">
-          <Button
-            text="Clear Category Filter"
-            rounded
-            fullWidth
-            size="md"
-            onClick={() => onCategorySelect('')}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
+ 
+       {/* Categories */}
+       <div className="text-left">
+         <h3 className="text-lg font-bold text-gray-800 mb-3">Categories</h3>
+         <ul className="space-y-3">
+           <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Apparel')}>
+             <FontAwesomeIcon icon={faShirt} className="w-5 h-5" />
+             <span>Apparel</span>
+           </li>
+           <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Electronics')}>
+             <FontAwesomeIcon icon={faLaptop} className="w-5 h-5" />
+             <span>Electronics</span>
+           </li>
+           {/* New categories matching backend enums with appropriate icons */}
+           <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Textbooks')}>
+             <FontAwesomeIcon icon={faBook} className="w-5 h-5" />
+             <span>Textbooks</span>
+           </li>
+           <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Furniture')}>
+             <FontAwesomeIcon icon={faCouch} className="w-5 h-5" />
+             <span>Furniture</span>
+           </li>
+           <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Sports')}>
+             <FontAwesomeIcon icon={faBaseballBall} className="w-5 h-5" />
+             <span>Sports</span>
+           </li>
+           <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Supplies')}>
+             <FontAwesomeIcon icon={faPencilAlt} className="w-5 h-5" />
+             <span>Supplies</span>
+           </li>
+           <li className="flex items-center space-x-3 text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleCategoryClick('Other')}>
+             <FontAwesomeIcon icon={faEllipsisH} className="w-5 h-5" />
+             <span>Other</span>
+           </li>
+         </ul>
+         <div className="px-4 mt-6">
+           <Button
+             text="Clear Category Filter"
+             rounded
+             fullWidth
+             size="md"
+             onClick={() => onCategorySelect('')}
+           />
+         </div>
+       </div>
+     </div>
+   );
+ }
 

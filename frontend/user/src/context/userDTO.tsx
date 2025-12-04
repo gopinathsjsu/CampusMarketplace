@@ -9,12 +9,14 @@ import {
 } from 'react';
 
 export type UserDTO = {
+  _id?: string;
   userName: string;
   displayName: string;
   profilePicture: string;
   schoolName: string;
   sellerRating: number;
   buyerRating: number;
+  role?: 'buyer' | 'seller' | 'admin';
 };
 
 export type UserContextValue = {

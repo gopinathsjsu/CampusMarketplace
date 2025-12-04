@@ -6,6 +6,8 @@ import SignUp from './pages/signUp/SignUp.tsx';
 import Home from './pages/home/Home.tsx'; // Import Home component
 import Profile from './pages/profile';
 import ProtectedRoute from './routes/ProtectedRoute';
+import { AdminRoute } from './routes/AdminRoute';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 function App() {
   return (
@@ -20,13 +22,22 @@ function App() {
                 <Home />
               </ProtectedRoute>
             }
-          /> {/* Route Home component to the root path */}
+          />{' '}
+          {/* Route Home component to the root path */}
           <Route
             path="/profile"
             element={
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
             }
           />
           <Route path="/sign-in" element={<SignIn />} />

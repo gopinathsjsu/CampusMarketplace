@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import Modal from '../modal';
 import MapPicker from '../map/MapPicker';
 import Button from '../button';
+import Notification from '../notification/Notification';
 import { productService, type ProductData, type ProductSellerInfo } from '../../services/products';
 import { useUser } from '../../context/userDTO';
+import { API } from '../../routes/api';
 
 interface ListingDetailsModalProps {
   isOpen: boolean;
@@ -18,16 +20,21 @@ function getSellerId(sellerId: ProductSellerInfo | string): string {
 }
 
 export default function ListingDetailsModal({
-                                              isOpen,
-                                              onClose,
-                                              listingId,
-                                            }: ListingDetailsModalProps) {
+  isOpen,
+  onClose,
+  listingId,
+}: ListingDetailsModalProps) {
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<ProductData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
 
   useEffect(() => {
     if (!isOpen || !listingId) return;
@@ -44,7 +51,8 @@ export default function ListingDetailsModal({
         setProduct(res.data.product);
       } catch (e: any) {
         if (!mounted) return;
-        setError(e?.message || 'Failed to load listing');
+        console.error('Failed to load product:', e, 'ListingId:', listingId);
+        setError(e?.message || 'Failed to load product');
         setProduct(null);
       } finally {
         if (mounted) setLoading(false);
@@ -71,11 +79,43 @@ export default function ListingDetailsModal({
       await productService.purchase(product._id);
       setPurchaseSuccess(true);
       // Update local product state to reflect the purchase
-      setProduct((prev) => prev ? { ...prev, status: 'sold' } : null);
+      setProduct((prev) => (prev ? { ...prev, status: 'sold' } : null));
     } catch (e: any) {
       setError(e?.message || 'Failed to complete purchase');
     } finally {
       setPurchasing(false);
+    }
+  };
+
+  const handleReport = async () => {
+    if (!product || isReporting) return;
+
+    setIsReporting(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setNotification({ message: 'Please sign in to report listings', type: 'error' });
+        return;
+      }
+
+      const response = await fetch(API.products.report(product._id), {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to report product');
+      }
+
+      setNotification({ message: 'Product reported to admin successfully', type: 'success' });
+    } catch (error) {
+      console.error('Error reporting product:', error);
+      setNotification({ message: 'Failed to report product. Please try again.', type: 'error' });
+    } finally {
+      setIsReporting(false);
     }
   };
 
@@ -88,20 +128,19 @@ export default function ListingDetailsModal({
   const description = product?.description ?? '';
   const price = product?.price ?? 0;
   const image = product?.images?.[0] ?? '';
-  const tags = (product?.tags && product.tags.length > 0)
-    ? product.tags
-    : (product?.category ? [product.category] : []);
+  const tags =
+    product?.tags && product.tags.length > 0
+      ? product.tags
+      : product?.category
+        ? [product.category]
+        : [];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} mask={true} backgroundColor="#EFF1F5" width="75vw">
       <div className="w-full">
-        <h2 className="text-2xl font-extrabold text-gray-900 text-center mb-6">
-          {title}
-        </h2>
+        <h2 className="text-2xl font-extrabold text-gray-900 text-center mb-6">{title}</h2>
 
-        {error && (
-          <div className="text-red-600 text-center mb-4">{error}</div>
-        )}
+        {error && <div className="text-red-600 text-center mb-4">{error}</div>}
 
         <div className="grid md:grid-cols-2 gap-6 items-start">
           {/* Left column: image + description */}
@@ -141,7 +180,11 @@ export default function ListingDetailsModal({
             </div>
             <div>
               <div className="text-4xl font-extrabold text-gray-900 mb-3 text-left">
-                ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {price.toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </div>
               <div className="flex flex-wrap gap-2">
                 {tags.map((t) => (
@@ -154,7 +197,6 @@ export default function ListingDetailsModal({
                 ))}
               </div>
             </div>
-
           </div>
         </div>
         <div className="flex justify-center">
@@ -187,9 +229,42 @@ export default function ListingDetailsModal({
           )}
         </div>
 
+        {/* Report button - subtle and at the bottom, hidden for admins */}
+        {user?.role !== 'admin' && (
+          <div className="mt-6 pt-4 border-t border-gray-200 flex justify-center">
+            <button
+              onClick={handleReport}
+              disabled={isReporting}
+              className="text-sm text-gray-500 hover:text-red-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+                />
+              </svg>
+              {isReporting ? 'Reporting...' : 'Report to Admin'}
+            </button>
+          </div>
+        )}
+
+        {notification && (
+          <Notification
+            message={notification.message}
+            type={notification.type}
+            isVisible={!!notification}
+            onClose={() => setNotification(null)}
+          />
+        )}
       </div>
     </Modal>
   );
 }
-
-

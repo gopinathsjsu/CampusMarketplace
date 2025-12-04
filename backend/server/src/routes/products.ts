@@ -382,6 +382,41 @@ router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: e
   });
 }));
 
+// @route   POST /api/products/:id/purchase
+// @desc    Purchase a product listing
+// @access  Private
+router.post('/:id/purchase', authenticate, asyncHandler(async (req: AuthRequest, res: express.Response) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    throw createError('Product not found', 404);
+  }
+
+  // Check if buyer is trying to buy their own product
+  if ((product as any).sellerId.toString() === req.user!._id.toString()) {
+    throw createError('Cannot purchase your own listing', 400);
+  }
+
+  // Check if product is available
+  if (product.status !== 'available') {
+    throw createError('Product is no longer available', 400);
+  }
+
+  // Update product with buyer info and mark as sold
+  product.buyerId = req.user!._id;
+  product.status = 'sold';
+  await product.save();
+
+  await product.populate('sellerId', 'userName profilePicture firstName lastName avatar university schoolName');
+  await product.populate('buyerId', 'userName profilePicture firstName lastName avatar university schoolName');
+
+  res.json({
+    success: true,
+    message: 'Product purchased successfully',
+    data: { product }
+  });
+}));
+
 // @route   POST /api/products/:id/report
 // @desc    Report a product listing
 // @access  Private

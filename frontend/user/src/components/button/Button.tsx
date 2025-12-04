@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 interface ButtonProps {
   text: string;
   color?: string;
@@ -6,6 +8,8 @@ interface ButtonProps {
   size?: 'base' | 'lg' | string;
   bold?: boolean;
   type?: 'button' | 'submit' | 'reset';
+  rightIcon?: ReactNode;
+  fullWidth?: boolean;
 }
 
 export default function Button({
@@ -16,6 +20,8 @@ export default function Button({
   size = 'base',
   bold = true,
   type = 'button',
+  rightIcon,
+  fullWidth = false,
 }: ButtonProps) {
 
   const sizeClasses = (() => {
@@ -30,7 +36,9 @@ export default function Button({
   })();
 
   const weightClass = bold ? 'font-bold' : 'font-normal';
-  const baseClasses = `${sizeClasses} ${weightClass} text-white cursor-pointer`;
+  const widthClass = fullWidth ? 'w-full' : '';
+  const layoutClass = rightIcon ? 'flex items-center justify-between' : '';
+  const baseClasses = `${sizeClasses} ${weightClass} ${widthClass} ${layoutClass} text-white cursor-pointer`;
   const roundedClasses = rounded
     ? 'rounded-full'
     : (size === 'lg' ? 'rounded-2xl' : 'rounded-xl');
@@ -43,7 +51,8 @@ export default function Button({
       type={type}
       onClick={onClick}
     >
-      {text}
+      <span>{text}</span>
+      {rightIcon}
     </button>
   );
 }

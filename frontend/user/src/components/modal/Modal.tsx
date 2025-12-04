@@ -19,7 +19,8 @@ export default function Modal({
 }: ModalProps) {
   if (!isOpen) return null;
 
-  const handleOverlayClick = () => {
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     onClose();
   };
 

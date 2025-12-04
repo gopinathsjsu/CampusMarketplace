@@ -28,11 +28,11 @@
 
 ### Seth: Frontend Listings (Seller Experience)
 *Focus: Creating and managing listings.*
-- [ ] **Create Listing Page**: Build a form for title, description, price, category, condition, location, and tags.
-- [ ] **Image Upload**: Implement a file picker and submit using `FormData` to `POST /api/products` (multipart/form-data).
+- [x] **Create Listing Page**: Build a form for title, description, price, category, condition, location, and tags.
+- [x] **Image Upload**: Implement a file picker and submit using `FormData` to `POST /api/products` (multipart/form-data).
 - [ ] **Edit Listing**: Prefill the form from `GET /api/products/:id` and submit updates to `PUT /api/products/:id`.
-- [ ] **My Listings Page**: Show a list of the logged-in user’s products with edit/delete actions.
-- [ ] **Product Details Page**: Display full listing details (images, seller info, description, price, condition, location, tags).
+- [x] **My Listings Page**: Show a list of the logged-in user’s products with edit/delete actions.
+- [x] **Product Details Page**: Display full listing details (images, seller info, description, price, condition, location, tags).
 
 ### Faye: Frontend Home, Search & Filters
 *Focus: Discovery experience for buyers.*

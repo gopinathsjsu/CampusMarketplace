@@ -130,6 +130,7 @@ export default function Home() {
         sellingMode={sellingMode}
         onSellingToggle={handleSellingToggle}
         onCategorySelect={setSelectedCategory}
+        selectedCondition={selectedCondition}
         onConditionSelect={setSelectedCondition}
         minPrice={minPrice === '' ? '' : String(minPrice)}
         maxPrice={maxPrice === '' ? '' : String(maxPrice)}

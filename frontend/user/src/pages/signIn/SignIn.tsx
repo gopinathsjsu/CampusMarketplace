@@ -8,7 +8,7 @@ import { authService, ApiError } from "../../services/auth.ts";
 import Notification from "../../components/notification";
 
 export default function SignIn() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,14 +28,13 @@ export default function SignIn() {
   }, [location.state]);
 
   const handleSignIn = async () => {
-    if (!email || !password) {
-      setNotification({ show: true, message: 'Please enter both email and password', type: 'error' });
+    if (!identifier || !password) {
+      setNotification({ show: true, message: 'Please enter your email/username and password', type: 'error' });
       return;
     }
 
     try {
-      // Treat the username field as the email for login
-      const res = await authService.signIn({ email, password });
+      const res = await authService.signIn({ identifier, password });
       const { user, token } = res.data;
 
       // Persist token for subsequent authenticated requests
@@ -48,7 +47,7 @@ export default function SignIn() {
 
       if (err instanceof ApiError) {
         if (err.status === 401) {
-          message = 'Invalid email or password';
+          message = 'Invalid email/username or password';
         } else if (err.message) {
           message = err.message;
         }
@@ -81,12 +80,12 @@ export default function SignIn() {
 
           <div className="space-y-4">
             <Input
-              placeholder="Email"
+              placeholder="Email or Username"
               width="350px"
               border={false}
               size={"lg"}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
             />
             <Input
               placeholder="Password"

@@ -45,7 +45,7 @@ export const uploadToS3 = async (
   const {
     folder = 'uploads',
     allowedMimeTypes = [],
-    maxSizeBytes = 10 * 1024 * 1024 // Default 10MB
+    maxSizeBytes = 100 * 1024 * 1024 // Default 100MB
   } = options;
 
   // Validate file type if specified

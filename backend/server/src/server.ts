@@ -74,8 +74,8 @@ app.use((req, _res, next) => {
 app.use(compression());
 app.use(morgan('combined'));
 app.use(limiter);
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // Additional verbose logging including request body (post-parsing)
 morgan.token('body', (req) => {

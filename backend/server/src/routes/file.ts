@@ -36,7 +36,7 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB
+    fileSize: 100 * 1024 * 1024, // 100MB
     files: 10 // Maximum 10 files
   }
 });
@@ -72,7 +72,7 @@ router.post('/upload', authenticate, upload.single('file'), [
   const result = await uploadToS3(req.file, {
     folder,
     allowedMimeTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
-    maxSizeBytes: 5 * 1024 * 1024 // 5MB for images
+    maxSizeBytes: 100 * 1024 * 1024 // 100MB for images
   });
 
   res.status(201).json({
@@ -122,7 +122,7 @@ router.post('/upload-multiple', authenticate, upload.array('files', 10), [
   const results = await uploadMultipleToS3(files, {
     folder,
     allowedMimeTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
-    maxSizeBytes: 5 * 1024 * 1024 // 5MB per image
+    maxSizeBytes: 100 * 1024 * 1024 // 100MB per image
   });
 
   const uploadedFiles = results.map((result, index) => ({

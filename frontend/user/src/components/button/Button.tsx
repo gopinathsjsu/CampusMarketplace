@@ -10,6 +10,7 @@ interface ButtonProps {
   type?: 'button' | 'submit' | 'reset';
   rightIcon?: ReactNode;
   fullWidth?: boolean;
+  disabled?: boolean;
 }
 
 export default function Button({
@@ -22,6 +23,7 @@ export default function Button({
   type = 'button',
   rightIcon,
   fullWidth = false,
+  disabled = false,
 }: ButtonProps) {
 
   const sizeClasses = (() => {
@@ -38,7 +40,8 @@ export default function Button({
   const weightClass = bold ? 'font-bold' : 'font-normal';
   const widthClass = fullWidth ? 'w-full' : '';
   const layoutClass = rightIcon ? 'flex items-center justify-between' : '';
-  const baseClasses = `${sizeClasses} ${weightClass} ${widthClass} ${layoutClass} text-white cursor-pointer`;
+  const disabledClass = disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+  const baseClasses = `${sizeClasses} ${weightClass} ${widthClass} ${layoutClass} ${disabledClass} text-white`;
   const roundedClasses = rounded
     ? 'rounded-full'
     : (size === 'lg' ? 'rounded-2xl' : 'rounded-xl');
@@ -47,9 +50,10 @@ export default function Button({
   return (
     <button
       className={className}
-      style={{ backgroundColor: color }}
+      style={{ backgroundColor: disabled ? '#9CA3AF' : color }}
       type={type}
       onClick={onClick}
+      disabled={disabled}
     >
       <span>{text}</span>
       {rightIcon}

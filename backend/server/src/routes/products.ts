@@ -41,6 +41,7 @@ router.get('/', [
   query('minPrice').optional().isFloat({ min: 0 }).withMessage('Min price must be positive'),
   query('maxPrice').optional().isFloat({ min: 0 }).withMessage('Max price must be positive'),
   query('search').optional().isString().trim(),
+  query('location').optional().isString().trim(),
   query('status').optional().isIn(['available', 'sold', 'pending']).withMessage('Invalid status'),
   query('sortBy').optional().isIn(['price', 'createdAt', 'views']),
   query('sortOrder').optional().isIn(['asc', 'desc'])
@@ -53,6 +54,7 @@ router.get('/', [
     minPrice,
     maxPrice,
     search,
+    location,
     status = 'available',
     sortBy = 'createdAt',
     sortOrder = 'desc'

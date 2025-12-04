@@ -127,6 +127,8 @@ export default function Home() {
       <Sidebar
         search={search}
         onSearchChange={setSearch}
+        sellingMode={sellingMode}
+        onSellingToggle={handleSellingToggle}
         onCategorySelect={setSelectedCategory}
         onConditionSelect={setSelectedCondition}
         minPrice={minPrice === '' ? '' : String(minPrice)}

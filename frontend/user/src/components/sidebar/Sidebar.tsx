@@ -16,6 +16,8 @@ import Button from '../button/Button.tsx';
 interface SidebarProps {
   search: string;
   onSearchChange: (value: string) => void;
+  sellingMode: boolean;
+  onSellingToggle: () => void;
   onCategorySelect: (category: string) => void;
   onConditionSelect: (condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor' | '') => void;
   minPrice: string;
@@ -35,7 +37,7 @@ const categoryMap: { [key: string]: string } = {
   'Other': 'other', // Explicitly mapping 'Other' to 'other' backend enum
 };
 
-export default function Sidebar({ search, onSearchChange, onCategorySelect, onConditionSelect, minPrice, maxPrice, onMinPriceChange, onMaxPriceChange }: SidebarProps) {
+export default function Sidebar({ search, onSearchChange, sellingMode, onSellingToggle, onCategorySelect, onConditionSelect, minPrice, maxPrice, onMinPriceChange, onMaxPriceChange }: SidebarProps) {
   const handleCategoryClick = (displayName: string) => {
     const backendCategory = categoryMap[displayName];
     if (backendCategory) {
@@ -65,7 +67,7 @@ export default function Sidebar({ search, onSearchChange, onCategorySelect, onCo
   };
 
   return (
-    <div className="w-100 bg-white shadow-lg p-10 space-y-6 overflow-y-auto max-h-screen">
+    <div className="w-85 bg-white p-10 space-y-6 overflow-y-auto max-h-screen">
       {/* Search Bar */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

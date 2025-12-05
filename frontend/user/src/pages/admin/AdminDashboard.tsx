@@ -281,59 +281,120 @@ export default function AdminDashboard() {
       </div>
 
       {/* Product Details Modal */}
-      <Modal isOpen={showDetailsModal} onClose={() => setShowDetailsModal(false)}>
+      <Modal isOpen={showDetailsModal} onClose={() => setShowDetailsModal(false)} width="70vw">
         {selectedProduct && (
-          <div className="max-w-3xl">
-            <h2 className="text-2xl font-bold mb-4">{selectedProduct.title}</h2>
-
-            {/* Images */}
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              {selectedProduct.images.map((img, idx) => (
-                <img key={idx} src={img} alt="" className="w-full h-32 object-cover rounded" />
-              ))}
-            </div>
-
-            {/* Details */}
-            <div className="space-y-3 mb-6">
-              <div>
-                <span className="font-semibold">Price:</span> ${selectedProduct.price.toFixed(2)}
-              </div>
-              <div>
-                <span className="font-semibold">Category:</span> {selectedProduct.category}
-              </div>
-              <div>
-                <span className="font-semibold">Condition:</span> {selectedProduct.condition}
-              </div>
-              <div>
-                <span className="font-semibold">Location:</span> {selectedProduct.location}
-              </div>
-              <div>
-                <span className="font-semibold">Description:</span>
-                <p className="mt-1 text-gray-700">{selectedProduct.description}</p>
-              </div>
-              <div>
-                <span className="font-semibold">Seller:</span> {selectedProduct.sellerId.userName} (
-                {selectedProduct.sellerId.email})
-              </div>
-              <div>
-                <span className="font-semibold">Reported by:</span>
-                <ul className="mt-1 list-disc list-inside">
-                  {selectedProduct.reportedBy.map((reporter) => (
-                    <li key={reporter._id}>
-                      {reporter.userName} ({reporter.email})
-                    </li>
-                  ))}
-                </ul>
+          <div className="p-2">
+            {/* Header with title */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">{selectedProduct.title}</h2>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700 border border-red-200">
+                  {selectedProduct.reportedBy.length} Report{selectedProduct.reportedBy.length !== 1 ? 's' : ''}
+                </span>
+                <span className="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+                  {selectedProduct.category}
+                </span>
+                <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600">
+                  {selectedProduct.condition}
+                </span>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-3">
-              <Button
-                text="Delete Product"
-                color="#DC2626"
-                onClick={() => handleDeleteClick(selectedProduct)}
-              />
+            {/* Main content - two column layout */}
+            <div className="flex gap-6">
+              {/* Left column - Images */}
+              <div className="w-64 flex-shrink-0">
+                {selectedProduct.images.length > 0 && (
+                  <img
+                    src={selectedProduct.images[0]}
+                    alt={selectedProduct.title}
+                    className="w-full h-64 object-cover rounded-lg shadow-sm border border-gray-200"
+                  />
+                )}
+                {selectedProduct.images.length > 1 && (
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {selectedProduct.images.slice(1, 4).map((img, idx) => (
+                      <img
+                        key={idx}
+                        src={img}
+                        alt=""
+                        className="w-full h-16 object-cover rounded-md border border-gray-200"
+                      />
+                    ))}
+                  </div>
+                )}
+                
+                {/* Price */}
+                <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
+                  <div className="text-xs uppercase tracking-wide text-green-600 font-semibold">Price</div>
+                  <div className="text-2xl font-bold text-green-700">${selectedProduct.price.toFixed(2)}</div>
+                </div>
+              </div>
+
+              {/* Right column - Details */}
+              <div className="flex-1 min-w-0">
+                {/* Description */}
+                <div className="mb-5">
+                  <h4 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-2">Description</h4>
+                  <p className="text-gray-700 leading-relaxed">{selectedProduct.description || 'No description provided'}</p>
+                </div>
+
+                {/* Location */}
+                <div className="mb-5">
+                  <h4 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-2">Location</h4>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {selectedProduct.location}
+                  </div>
+                </div>
+
+                {/* Seller Info */}
+                <div className="mb-5 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <h4 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3">Seller Information</h4>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      <span className="text-blue-600 font-semibold text-sm">
+                        {selectedProduct.sellerId.userName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900">{selectedProduct.sellerId.userName}</div>
+                      <div className="text-sm text-gray-500">{selectedProduct.sellerId.email}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Reported By */}
+                <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                  <h4 className="text-xs uppercase tracking-wide text-red-600 font-semibold mb-3 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Reported By
+                  </h4>
+                  <div className="space-y-2">
+                    {selectedProduct.reportedBy.map((reporter) => (
+                      <div key={reporter._id} className="flex items-center gap-2 text-sm">
+                        <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center">
+                          <span className="text-red-600 font-medium text-xs">
+                            {reporter.userName.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="text-gray-700">{reporter.userName}</span>
+                        <span className="text-gray-400">·</span>
+                        <span className="text-gray-500">{reporter.email}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions Footer */}
+            <div className="flex items-center justify-center gap-3 mt-6">
               <Button
                 text="Resolve Report"
                 color="#16A34A"
@@ -342,24 +403,49 @@ export default function AdminDashboard() {
                   setShowDetailsModal(false);
                 }}
               />
-              <Button text="Close" color="#9CA3AF" onClick={() => setShowDetailsModal(false)} />
+              <Button
+                text="Delete Product"
+                color="#DC2626"
+                onClick={() => handleDeleteClick(selectedProduct)}
+              />
             </div>
           </div>
         )}
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
+      <Modal isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} width="420px">
         {selectedProduct && (
-          <div className="text-center">
-            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
-            <p className="mb-6">
-              Are you sure you want to delete "{selectedProduct.title}"? This action cannot be
-              undone.
+          <div className="text-center p-2">
+            {/* Warning Icon */}
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Product?</h3>
+            <p className="text-gray-600 mb-6">
+              You're about to delete <span className="font-semibold text-gray-900">"{selectedProduct.title}"</span>. 
+              This action cannot be undone and will permanently remove this listing.
             </p>
+            
             <div className="flex gap-3 justify-center">
-              <Button text="Delete" color="#DC2626" onClick={handleDeleteConfirm} />
-              <Button text="Cancel" color="#9CA3AF" onClick={() => setShowDeleteConfirm(false)} />
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-5 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete Product
+              </button>
             </div>
           </div>
         )}

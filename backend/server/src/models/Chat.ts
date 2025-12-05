@@ -86,12 +86,11 @@ const chatSchema = new Schema<IChat>(
 );
 
 // Indexes for better query performance
-chatSchema.index({ participants: 1 });
+// Note: participants index removed - was causing issues with participant order
 chatSchema.index({ product: 1 });
 chatSchema.index({ lastActivity: -1 });
-// Ensure only one chat exists per pair of participants (regardless of product)
-// This allows users to have a single conversation thread
-chatSchema.index({ participants: 1 }, { unique: true });
+// Note: We ensure unique participant pairs in the application logic (findOrCreateChat)
+// rather than with a DB index, since array order matters for MongoDB unique indexes
 
 // Virtual for last message
 chatSchema.virtual("lastMessage").get(function () {
@@ -158,8 +157,12 @@ chatSchema.statics.findOrCreateChat = async function (
 
   // First, check if ANY chat already exists between these two users (regardless of product)
   // This ensures we return the existing chat instead of trying to create a duplicate
+  // We check both sorted and unsorted orders for backwards compatibility
   let chat = await this.findOne({
-    participants: { $all: [buyerId, sellerId], $size: 2 },
+    $or: [
+      { participants: { $all: [buyerId, sellerId], $size: 2 } },
+      { participants: sortedParticipants },
+    ],
   })
     .populate(
       "participants",
@@ -168,6 +171,24 @@ chatSchema.statics.findOrCreateChat = async function (
     .populate("product", "title price images status");
 
   if (chat) {
+    // If found chat has participants in wrong order, fix it
+    const currentOrder = chat.participants
+      .map((p: any) => p._id.toString())
+      .join("-");
+    const correctOrder = sortedParticipants
+      .map((p: any) => p.toString())
+      .join("-");
+
+    if (currentOrder !== correctOrder) {
+      chat.participants = sortedParticipants;
+      await chat.save();
+      // Re-populate after save
+      await chat.populate(
+        "participants",
+        "userName profilePicture firstName lastName avatar role"
+      );
+    }
+
     return chat;
   }
 
@@ -195,9 +216,12 @@ chatSchema.statics.findOrCreateChat = async function (
   } catch (error: any) {
     // If duplicate key error (chat was created between our check and create),
     // fetch and return the existing chat
-    if (error.code === 11000) {
+    if (error.code === 11000 || error.message?.includes("duplicate")) {
       chat = await this.findOne({
-        participants: { $all: [buyerId, sellerId], $size: 2 },
+        $or: [
+          { participants: { $all: [buyerId, sellerId], $size: 2 } },
+          { participants: sortedParticipants },
+        ],
       })
         .populate(
           "participants",
@@ -208,6 +232,9 @@ chatSchema.statics.findOrCreateChat = async function (
       if (chat) {
         return chat;
       }
+
+      // If still no chat found, it's a real error
+      console.error("Duplicate key error but no existing chat found:", error);
     }
     // If it's not a duplicate error or we couldn't find the chat, throw the error
     throw error;

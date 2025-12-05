@@ -9,6 +9,8 @@ import {
 import { useUser } from '../../context/userDTO';
 import Button from '../../components/button/Button';
 import Notification from '../../components/notification/Notification';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 export default function ChatPage() {
   const { user } = useUser();
@@ -332,7 +334,7 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex h-full bg-gray-50">
+    <div className="flex h-screen bg-gray-50">
       {/* Conversations List Sidebar */}
       <div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
@@ -552,23 +554,23 @@ export default function ChatPage() {
 
             {/* Message Input */}
             <div className="bg-white border-t-2 border-gray-300 p-4 shadow-lg">
-              <div className="flex gap-3 items-end">
+              <div className="relative">
                 <textarea
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Type your message here..."
-                  className="flex-1 border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none shadow-sm"
+                  className="w-full border-2 bg-white border-gray-300 rounded-3xl px-4 py-4 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                   rows={2}
                   disabled={sendingMessage}
                 />
-                <Button
-                  text={sendingMessage ? 'Sending...' : 'Send'}
+                <button
                   onClick={handleSendMessage}
                   disabled={!messageInput.trim() || sendingMessage}
-                  color="#1F55A2"
-                  size="lg"
-                />
+                  className="absolute right-3 bottom-3 w-10 h-10 bg-[#1F55A2] hover:bg-[#174080] text-white rounded-full flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FontAwesomeIcon icon={faPaperPlane} className={sendingMessage ? 'animate-pulse' : ''} />
+                </button>
               </div>
             </div>
           </>

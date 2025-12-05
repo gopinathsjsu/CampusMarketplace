@@ -3,7 +3,7 @@
  */
 
 // Base API URL - can be configured via environment variables
-export const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:5001/api';
+export const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:5050/api';
 
 /**
  * API Endpoints

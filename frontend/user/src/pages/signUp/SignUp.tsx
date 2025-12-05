@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/button';
 import Input from '../../components/input';
 import Modal from '../../components/modal';
+import { useUser } from '../../context/userDTO.tsx';
 import { authService, ApiError } from '../../services/auth.ts';
 import Notification from '../../components/notification';
 
@@ -13,11 +14,19 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
+  const { user } = useUser();
   const [notification, setNotification] = useState<{
     show: boolean;
     message: string;
     type: 'success' | 'error';
   }>({ show: false, message: '', type: 'success' });
+
+  // Redirect already-authenticated admin users to admin dashboard
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSignUp = async () => {
     if (!email || !userName || !schoolName || !password || !confirmPassword) {

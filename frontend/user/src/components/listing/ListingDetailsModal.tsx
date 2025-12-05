@@ -4,8 +4,10 @@ import MapPicker from '../map/MapPicker';
 import Button from '../button';
 import Notification from '../notification/Notification';
 import { productService, type ProductData, type ProductSellerInfo } from '../../services/products';
+import { chatService } from '../../services/chat';
 import { useUser } from '../../context/userDTO';
 import { API } from '../../routes/api';
+import { useNavigate } from 'react-router-dom';
 
 interface ListingDetailsModalProps {
   isOpen: boolean;
@@ -25,6 +27,7 @@ export default function ListingDetailsModal({
   listingId,
 }: ListingDetailsModalProps) {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<ProductData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +38,8 @@ export default function ListingDetailsModal({
     message: string;
     type: 'success' | 'error';
   } | null>(null);
+  const [chatMessage, setChatMessage] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !listingId) return;
@@ -49,6 +54,10 @@ export default function ListingDetailsModal({
         const res = await productService.getById(listingId);
         if (!mounted) return;
         setProduct(res.data.product);
+        // Set pre-written message
+        setChatMessage(
+          `Hi! I'm interested in your ${res.data.product.title}. Is it still available?`,
+        );
       } catch (e: any) {
         if (!mounted) return;
         console.error('Failed to load product:', e, 'ListingId:', listingId);
@@ -116,6 +125,48 @@ export default function ListingDetailsModal({
       setNotification({ message: 'Failed to report product. Please try again.', type: 'error' });
     } finally {
       setIsReporting(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!product || !chatMessage.trim() || sendingMessage) return;
+    if (!user) {
+      setNotification({ message: 'Please sign in to send messages', type: 'error' });
+      return;
+    }
+
+    const sellerId = getSellerId(product.sellerId);
+
+    if (user._id === sellerId) {
+      setNotification({ message: 'You cannot message yourself', type: 'error' });
+      return;
+    }
+
+    setSendingMessage(true);
+    try {
+      // Create or get existing chat
+      const chatResponse = await chatService.createChat({
+        productId: product._id,
+        sellerId: sellerId,
+      });
+
+      // Send the message
+      await chatService.sendMessage(chatResponse.data.chat._id, {
+        content: chatMessage.trim(),
+      });
+
+      setNotification({ message: 'Message sent successfully!', type: 'success' });
+
+      // Close modal and navigate to chat
+      setTimeout(() => {
+        onClose();
+        navigate(`/chat?chatId=${chatResponse.data.chat._id}`);
+      }, 1000);
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      setNotification({ message: error.message || 'Failed to send message', type: 'error' });
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -228,6 +279,30 @@ export default function ListingDetailsModal({
             </div>
           )}
         </div>
+
+        {/* Chat with Seller Section */}
+        {user && product && user._id !== getSellerId(product.sellerId) && (
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Contact Seller</h3>
+            <div className="flex gap-3">
+              <textarea
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                placeholder="Type your message here..."
+                className="flex-1 border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                rows={3}
+                disabled={sendingMessage}
+              />
+              <Button
+                text={sendingMessage ? 'Sending...' : 'Send'}
+                onClick={handleSendMessage}
+                disabled={!chatMessage.trim() || sendingMessage}
+                color="#1F55A2"
+                size="base"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Report button - subtle and at the bottom, hidden for admins */}
         {user?.role !== 'admin' && (

@@ -285,7 +285,12 @@ export default function ChatPage() {
 
       if (data.success) {
         // Find an admin user
-        const adminUser = data.data.users.find((u: any) => u.role === 'admin');
+        const admins = data.data.users.filter((u: any) => u.role === 'admin');
+
+        // Prefer Ananya's account if present
+        const adminUser =
+          admins.find((u: any) => u.email?.toLowerCase() === 'ananya.makwana@sjsu.edu') ||
+          admins[0];
 
         if (adminUser) {
           // Try to open/create chat with admin

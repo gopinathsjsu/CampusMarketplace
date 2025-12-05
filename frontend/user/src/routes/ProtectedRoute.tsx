@@ -16,7 +16,7 @@ export default function ProtectedRoute({ children, allowAdmin = false }: Protect
   }
 
   // Redirect admin users to admin dashboard - they cannot access regular user routes
-  if (user?.role === 'admin') {
+  if (user?.role === 'admin' && !allowAdmin) {
     return <Navigate to="/admin" replace />;
   }
 

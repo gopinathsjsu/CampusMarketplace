@@ -11,3 +11,6 @@
 ![](https://i.imghippo.com/files/HcnO8603wVs.png)
 
 ![](https://i.imghippo.com/files/hwx6594zk.png)
+
+
+Weekly Backlog: https://docs.google.com/spreadsheets/d/1py5zGqc4vyuo-x2PG6ZQtZwP7iVicO14fkFoaXqmeaA/edit?gid=0#gid=0

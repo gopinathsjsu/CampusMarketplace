@@ -159,7 +159,7 @@ export default function ChatPage() {
     setLoadingUsers(true);
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:5001/api/users', {
+      const response = await fetch('http://3.236.144.247:5001/api/users', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -274,7 +274,7 @@ export default function ChatPage() {
       }
 
       // Fetch admin users
-      const response = await fetch('http://localhost:5001/api/users', {
+      const response = await fetch('http://3.236.144.247:5001/api/users', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',

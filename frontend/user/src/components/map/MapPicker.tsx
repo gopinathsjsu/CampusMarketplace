@@ -172,3 +172,4 @@ export default function MapPicker({
 
   return <div ref={containerRef} className={className} style={{ width: '100%', height: '100%' }} />;
 }
+

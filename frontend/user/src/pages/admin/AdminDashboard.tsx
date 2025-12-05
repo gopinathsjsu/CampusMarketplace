@@ -163,7 +163,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
         </div>
@@ -234,24 +234,24 @@ export default function AdminDashboard() {
                           />
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">{product.title}</div>
-                            <div className="text-sm text-gray-500">{product.category}</div>
+                            <div className="text-sm text-gray-500 text-left">{product.category}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">{product.sellerId.userName}</div>
-                        <div className="text-sm text-gray-500">{product.sellerId.schoolName}</div>
+                        <div className="text-sm text-gray-900 text-left">{product.sellerId.userName}</div>
+                        <div className="text-sm text-gray-500 text-left">{product.sellerId.schoolName}</div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-900 text-left">
                         ${product.price.toFixed(2)}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 text-left">
                         <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
                           {product.reportedBy.length} report
                           {product.reportedBy.length !== 1 ? 's' : ''}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium space-x-2">
+                      <td className="px-6 py-4 text-sm font-medium space-x-2 text-left">
                         <button
                           onClick={() => handleViewDetails(product)}
                           className="text-blue-600 hover:text-blue-900"

@@ -42,6 +42,10 @@ export default function Header() {
     navigate('/admin');
   };
 
+  const handleChatClick = () => {
+    navigate('/chat');
+  };
+
   // Hide sign in button on sign in and sign up pages
   const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up';
 
@@ -60,25 +64,25 @@ export default function Header() {
           {!isAuthPage &&
             (user ? (
               <div className="flex items-center space-x-6">
-                {user.role === 'admin' && (
-                  <Button
-                    text="Admin Dashboard"
-                    onClick={handleAdminClick}
-                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                  />
-                )}
                 <img
                   src="/assets/icons/notification.svg"
                   alt="Notifications"
                   className="h-7 w-7 cursor-pointer"
                 />
-                <img src="/assets/icons/inbox.svg" alt="Inbox" className="h-7 w-7 cursor-pointer" />
                 <img
-                  src="/assets/icons/create-listing.svg"
-                  alt="Create listing"
+                  src="/assets/icons/inbox.svg"
+                  alt="Messages"
                   className="h-7 w-7 cursor-pointer"
-                  onClick={() => setIsCreateModalOpen(true)}
+                  onClick={handleChatClick}
                 />
+                {user.role !== 'admin' && (
+                  <img
+                    src="/assets/icons/create-listing.svg"
+                    alt="Create listing"
+                    className="h-7 w-7 cursor-pointer"
+                    onClick={() => setIsCreateModalOpen(true)}
+                  />
+                )}
                 <div className="relative flex-shrink-0">
                   <img
                     src={user.profilePicture}

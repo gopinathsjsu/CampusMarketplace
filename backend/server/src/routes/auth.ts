@@ -34,7 +34,7 @@ const toUserDTO = (user: IUser) => ({
   schoolName: user.schoolName || "",
   sellerRating: user.sellerRating || 0,
   buyerRating: user.buyerRating || 0,
-  role: user.role || "buyer",
+  role: user.role || "user",
 });
 
 // @route   POST /api/auth/sign-up
@@ -87,7 +87,7 @@ router.post(
       password,
       profilePicture: profilePicture || defaultAvatar,
       schoolName,
-      role: isAdmin ? "admin" : "buyer",
+      role: isAdmin ? "admin" : "user",
     });
 
     // Generate token

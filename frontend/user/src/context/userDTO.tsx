@@ -16,7 +16,7 @@ export type UserDTO = {
   schoolName: string;
   sellerRating: number;
   buyerRating: number;
-  role?: 'buyer' | 'seller' | 'admin';
+  role?: 'user' | 'admin';
 };
 
 export type UserContextValue = {

@@ -7,6 +7,7 @@
     "dev": "nodemon -r tsconfig-paths/register src/server.ts",
     "build": "tsc",
     "seed": "ts-node src/scripts/seed.ts",
+    "fix-chats": "ts-node -r tsconfig-paths/register src/scripts/fix-chat-participants.ts",
     "test": "jest"
   },
   "keywords": [

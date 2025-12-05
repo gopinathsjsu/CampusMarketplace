@@ -339,9 +339,9 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex bg-gray-50">
+    <div className="flex bg-gray-50 h-[calc(100vh-64px)]">
       {/* Conversations List Sidebar */}
-      <div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-1/4 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
@@ -427,10 +427,10 @@ export default function ChatPage() {
                         )}
                       </div>
                       {chat.product && (
-                        <p className="text-sm text-gray-600 truncate">{chat.product.title}</p>
+                        <p className="text-sm text-gray-600 truncate text-left">{chat.product.title}</p>
                       )}
                       {lastMessage && (
-                        <p className="text-sm text-gray-500 truncate mt-1">
+                        <p className="text-sm text-gray-500 truncate mt-1 text-left">
                           {typeof lastMessage.sender === 'object' &&
                           lastMessage.sender._id === user?._id
                             ? 'You: '
@@ -463,7 +463,7 @@ export default function ChatPage() {
                     />
                     <div>
                       <h2 className="font-bold text-gray-900">{selectedChat.product.title}</h2>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 text-left">
                         ${selectedChat.product.price.toFixed(2)} • {selectedChat.product.status}
                       </p>
                     </div>
@@ -487,13 +487,13 @@ export default function ChatPage() {
                     </div>
                     <div>
                       <h2 className="font-bold text-gray-900">Direct Message</h2>
-                      <p className="text-sm text-gray-600">Private conversation</p>
+                      <p className="text-sm text-gray-600 With:">Private conversation</p>
                     </div>
                   </div>
                 )}
                 {getOtherParticipant(selectedChat.participants) && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">With:</span>
+                    <span className="text-sm text-gray-600 text-left">With:</span>
                     <span className="font-medium text-gray-900">
                       {getOtherParticipant(selectedChat.participants)?.userName}
                     </span>

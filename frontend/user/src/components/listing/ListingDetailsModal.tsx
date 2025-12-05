@@ -8,6 +8,8 @@ import { chatService } from '../../services/chat';
 import { useUser } from '../../context/userDTO';
 import { API } from '../../routes/api';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 interface ListingDetailsModalProps {
   isOpen: boolean;
@@ -34,6 +36,8 @@ export default function ListingDetailsModal({
   const [purchasing, setPurchasing] = useState(false);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('');
   const [notification, setNotification] = useState<{
     message: string;
     type: 'success' | 'error';
@@ -96,8 +100,21 @@ export default function ListingDetailsModal({
     }
   };
 
-  const handleReport = async () => {
-    if (!product || isReporting) return;
+  const handleOpenReportModal = () => {
+    if (!user) {
+      setNotification({ message: 'Please sign in to report listings', type: 'error' });
+      return;
+    }
+    setShowReportModal(true);
+  };
+
+  const handleCloseReportModal = () => {
+    setShowReportModal(false);
+    setReportReason('');
+  };
+
+  const handleSubmitReport = async () => {
+    if (!product || isReporting || !reportReason.trim()) return;
 
     setIsReporting(true);
     try {
@@ -113,6 +130,7 @@ export default function ListingDetailsModal({
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ reason: reportReason.trim() }),
       });
 
       if (!response.ok) {
@@ -120,6 +138,7 @@ export default function ListingDetailsModal({
       }
 
       setNotification({ message: 'Product reported to admin successfully', type: 'success' });
+      handleCloseReportModal();
     } catch (error) {
       console.error('Error reporting product:', error);
       setNotification({ message: 'Failed to report product. Please try again.', type: 'error' });
@@ -284,22 +303,22 @@ export default function ListingDetailsModal({
         {user && product && user._id !== getSellerId(product.sellerId) && (
           <div className="mt-6 pt-4 border-t border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Contact Seller</h3>
-            <div className="flex gap-3">
+            <div className="relative">
               <textarea
                 value={chatMessage}
                 onChange={(e) => setChatMessage(e.target.value)}
                 placeholder="Type your message here..."
-                className="flex-1 border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                className="w-full border-2 bg-white  border-gray-300 rounded-3xl px-4 py-4 pr-24 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                 rows={3}
                 disabled={sendingMessage}
               />
-              <Button
-                text={sendingMessage ? 'Sending...' : 'Send'}
+              <button
                 onClick={handleSendMessage}
                 disabled={!chatMessage.trim() || sendingMessage}
-                color="#1F55A2"
-                size="base"
-              />
+                className="absolute right-3 bottom-3 w-10 h-10 bg-[#1F55A2] hover:bg-[#174080] text-white rounded-full flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <FontAwesomeIcon icon={faPaperPlane} className={sendingMessage ? 'animate-pulse' : ''} />
+              </button>
             </div>
           </div>
         )}
@@ -308,9 +327,8 @@ export default function ListingDetailsModal({
         {user?.role !== 'admin' && (
           <div className="mt-6 pt-4 border-t border-gray-200 flex justify-center">
             <button
-              onClick={handleReport}
-              disabled={isReporting}
-              className="text-sm text-gray-500 hover:text-red-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              onClick={handleOpenReportModal}
+              className="text-sm text-gray-500 hover:text-red-600 transition-colors duration-200 flex items-center gap-2"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -326,10 +344,44 @@ export default function ListingDetailsModal({
                   d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
                 />
               </svg>
-              {isReporting ? 'Reporting...' : 'Report to Admin'}
+              Report to Admin
             </button>
           </div>
         )}
+
+        {/* Report Modal */}
+        <Modal isOpen={showReportModal} onClose={handleCloseReportModal} mask={true} width="30vw">
+          <div className="w-full">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Report Listing</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              Please provide a reason for reporting this listing. Our admin team will review your report.
+            </p>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="Enter your reason for reporting this listing..."
+              className="w-full border-2 border-gray-300 rounded-3xl bg-white px-4 py-4 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+              rows={4}
+              disabled={isReporting}
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <Button
+                text="Cancel"
+                onClick={handleCloseReportModal}
+                disabled={isReporting}
+                color="#6B7280"
+                size="base"
+              />
+              <Button
+                text={isReporting ? 'Submitting...' : 'Submit Report'}
+                onClick={handleSubmitReport}
+                disabled={isReporting || !reportReason.trim()}
+                color="#DC2626"
+                size="base"
+              />
+            </div>
+          </div>
+        </Modal>
 
         {notification && (
           <Notification

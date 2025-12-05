@@ -1,4 +1,8 @@
-# Figma UI mockups
+## UML Diagrams
+
+![UML Diagrams](https://i.imghippo.com/files/uDxS3243H.png)
+
+## Figma UI mockups
 
 ## User
 

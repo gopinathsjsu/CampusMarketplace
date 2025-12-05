@@ -339,7 +339,7 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex bg-gray-50">
       {/* Conversations List Sidebar */}
       <div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">

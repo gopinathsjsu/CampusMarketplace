@@ -13,12 +13,19 @@ export default function SignIn() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
   const [notification, setNotification] = useState<{
     show: boolean;
     message: string;
     type: 'success' | 'error';
   }>({ show: false, message: '', type: 'success' });
+
+  // Redirect already-authenticated admin users to admin dashboard
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const state = location.state as { message?: string } | null;
@@ -44,7 +51,13 @@ export default function SignIn() {
       } catch {}
 
       setUser(user);
-      navigate('/');
+      
+      // Redirect admin users to admin dashboard, regular users to home
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       let message = 'Failed to sign in';
 

@@ -1,18 +1,21 @@
 # Crispy Waffles
 Team Members: Eugene, Faye, Seth, Ananya
 
+## Summary
+### Eugene
+Eugene served as the backend and infrastructure lead for the project. He spent significant time stabilizing all existing APIs, reviewing the products, chat, auth, and users routes to fix bugs and add missing validations. He also standardized all API responses to follow a consistent format, which improved the development workflow for the entire team. One of his key contributions was implementing the AI search endpoint using the ChatGPT API, allowing users to search with natural language queries like "textbook for CMPE 202" instead of relying solely on keyword matching. Eugene built the complete admin API suite, including endpoints to list reported products and mark them as reviewed or taken down. On the deployment side, he finalized Docker and Docker Compose configurations for the backend, MongoDB, and frontend, resolving compatibility issues with Express 5 and Node 22 in the process. He secured the product update and delete routes with proper authorization checks and addressed several frontend configuration issues related to port mapping and environment variables. His work ensured the entire technical stack functioned cohesively from development through production deployment.
+### Seth
+Seth owned the frontend seller experience, building all interfaces for listing creation and management. He developed the create listing page with a comprehensive form covering title, description, price, category, condition, location, and tags, and implemented image upload functionality using FormData. He created the "My Listings" page where sellers can view all their products with options to edit or delete them, providing complete inventory management capabilities. Seth also built the product details page displaying full listing information including image galleries, seller contact details, descriptions, pricing, condition, location, and tags. He began work on the edit listing feature to allow sellers to modify their products by prefilling forms with existing data and submitting updates, though this remained in progress through the final stages. His contributions provided sellers with a polished interface for managing their marketplace presence from initial listing creation through ongoing updates.
+### Faye
+Faye established the database foundation and built the buyer discovery experience on the frontend. She designed the complete database schema including Users, Listings, Messages, Reports, and Categories tables with all relationships and migration scripts. She also set up the project journal with scrum templates and XP values documentation. Faye built the JWT authentication middleware that secures protected routes throughout the application and implemented the login interface. For the buyer experience, she created the home and browse page that fetches products from the API and renders them in a grid layout. She implemented the search bar functionality connected to query parameters and built a comprehensive filtering system with controls for category, condition, and price ranges that integrate with the backend API. She also developed pagination and "load more" functionality to handle large product catalogs efficiently. In the final weeks, Faye set up the CI/CD pipeline using GitHub Actions to automate testing and deployment.
+### Ananya
+Ananya focused on the chat system, administrative tools, and maintaining comprehensive project documentation. At the project's outset, she configured the entire development environment including Docker containerization and local database setup, accompanied by thorough documentation to help all team members get started. She created all UI wireframes across the buyer, seller, and admin experiences. Ananya built the complete chat interface with both the conversations list and message thread views, connecting them to the backend APIs for fetching conversations, retrieving messages, and sending new messages. She implemented the "Start Chat Flow" by connecting the "Message Seller" button on product pages to create or open conversations for specific products, which enabled the negotiation feature central to the marketplace concept. Ananya also developed a minimal admin view for monitoring reported products using the admin APIs Eugene created. Throughout the project, she maintained the implementation plan and architectural diagrams, ensuring all work was properly documented for course requirements. Her contributions spanned infrastructure setup, real time communication features, administrative oversight tools, and comprehensive project documentation.
 ## Preview
-
 ![](https://i.imghippo.com/files/jTc6877qyE.png)
-
 ![](https://i.imghippo.com/files/GmLb9916irQ.png)
-
 ![](https://i.imghippo.com/files/LXJG8066wZ.png)
-
 ![](https://i.imghippo.com/files/VD6604bDM.png)
-
 ![](https://i.imghippo.com/files/HcnO8603wVs.png)
-
 ![](https://i.imghippo.com/files/hwx6594zk.png)
 
 Weekly Backlog: https://docs.google.com/spreadsheets/d/1py5zGqc4vyuo-x2PG6ZQtZwP7iVicO14fkFoaXqmeaA/edit?gid=0#gid=0
